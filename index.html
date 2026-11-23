@@ -1,0 +1,2921 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kapten Langit: Misi Penyelamatan</title>
+  <!-- Font ramah anak dengan fallback aman jika offline -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =====================================================================
+       RESET & OPTIMASI EMBED GOOGLE SITES (FULL VIEWPORT, TANPA SCROLLBAR)
+       ===================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+      font-family: 'Fredoka', 'Comic Sans MS', 'Segoe UI', sans-serif;
+      background: #38bdf8;
+      color: #1e293b;
+    }
+
+    #game-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+    }
+
+    /* =====================================================================
+       OVERLAY UI & KARTU RAMAH ANAK
+       ===================================================================== */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+      z-index: 20;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border: 5px solid #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 14px 35px rgba(15, 23, 42, 0.24), inset 0 -6px 0 rgba(0, 0, 0, 0.06);
+      padding: 18px 22px;
+      width: 100%;
+      max-width: 720px;
+      max-height: 94vh;
+      overflow-y: auto;
+      text-align: center;
+      animation: popIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.88); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .game-title {
+      font-size: clamp(1.75rem, 4.6vw, 2.85rem);
+      font-weight: 700;
+      color: #0284c7;
+      text-shadow: 0 4px 0 #bae6fd, 0 6px 14px rgba(2, 132, 199, 0.22);
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+
+    .game-subtitle {
+      font-size: clamp(0.95rem, 2.3vw, 1.15rem);
+      color: #475569;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    /* Tombol Gelembung 3D Ramah Anak */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn:active {
+      transform: translateY(3px) scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #ff7043 0%, #f4511e 100%);
+      color: #ffffff;
+      font-size: clamp(1.1rem, 2.8vw, 1.38rem);
+      padding: 13px 32px;
+      box-shadow: 0 6px 0 #bf360c, 0 10px 20px rgba(244, 81, 30, 0.34);
+    }
+
+    .btn-primary:active {
+      box-shadow: 0 2px 0 #bf360c;
+    }
+
+    .btn-success {
+      background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+      color: #ffffff;
+      font-size: clamp(1rem, 2.6vw, 1.25rem);
+      padding: 12px 26px;
+      box-shadow: 0 6px 0 #15803d, 0 10px 18px rgba(22, 163, 74, 0.3);
+    }
+
+    .btn-success:active {
+      box-shadow: 0 2px 0 #15803d;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      color: #ffffff;
+      font-size: clamp(0.95rem, 2.4vw, 1.12rem);
+      padding: 11px 22px;
+      box-shadow: 0 5px 0 #0369a1, 0 8px 16px rgba(2, 132, 199, 0.25);
+    }
+
+    .btn-secondary:active {
+      box-shadow: 0 2px 0 #0369a1;
+    }
+
+    /* Tombol Toggle Suara Pojok Kanan Atas */
+    .btn-sound-pill {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: clamp(0.85rem, 2vw, 0.98rem);
+      color: #0f172a;
+      box-shadow: 0 4px 0 #cbd5e1, 0 6px 12px rgba(15, 23, 42, 0.14);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-sound-pill:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #cbd5e1;
+    }
+
+    .btn-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 3px solid #ffffff;
+      box-shadow: 0 4px 0 #cbd5e1, 0 6px 12px rgba(15, 23, 42, 0.15);
+      font-size: 1.2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-icon:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #cbd5e1;
+    }
+
+    /* Grid Pilihan 4 Misi di Menu Awal */
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 11px;
+      margin: 12px 0 18px;
+    }
+
+    @media (max-width: 520px) {
+      .mission-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+    }
+
+    .mission-card {
+      background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 3px solid #7dd3fc;
+      border-radius: 20px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .mission-card:hover {
+      transform: translateY(-2px);
+      border-color: #0284c7;
+      box-shadow: 0 8px 16px rgba(2, 132, 199, 0.16);
+    }
+
+    .mission-card.selected {
+      background: linear-gradient(180deg, #fef9c3 0%, #fde047 100%);
+      border-color: #eab308;
+      box-shadow: 0 5px 0 #ca8a04, 0 10px 18px rgba(234, 179, 8, 0.25);
+    }
+
+    .mission-icon {
+      font-size: 2.1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .mission-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .mission-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mission-num {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      background: #0284c7;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .mission-new {
+      font-size: 0.68rem;
+      background: #ef4444;
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .mission-card.selected .mission-num {
+      background: #d97706;
+    }
+
+    .mission-name {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .mission-tag {
+      font-size: 0.78rem;
+      color: #475569;
+      line-height: 1.2;
+    }
+
+    /* =====================================================================
+       HUD SAAT BERMAIN
+       ===================================================================== */
+    #hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px 12px;
+    }
+
+    .hud-top-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .hud-top {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hud-pill {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.92);
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      padding: 5px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+      font-weight: 700;
+      font-size: clamp(0.88rem, 2.1vw, 1.05rem);
+    }
+
+    .hearts-container {
+      display: flex;
+      gap: 3px;
+      font-size: clamp(1rem, 2.4vw, 1.25rem);
+    }
+
+    .progress-box {
+      flex: 1;
+      min-width: 135px;
+      max-width: 320px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      padding: 5px 12px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 3px;
+    }
+
+    .progress-track {
+      position: relative;
+      height: 11px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #4ade80, #facc15);
+      border-radius: 999px;
+      transition: width 0.12s linear;
+    }
+
+    .hud-actions {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      pointer-events: auto;
+    }
+
+    /* Lampu Indikator Alarm Kokpit Berkedip */
+    #cockpit-alarm {
+      background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+      color: #ffffff;
+      border: 3px solid #fef08a;
+      border-radius: 999px;
+      padding: 7px 20px;
+      font-weight: 700;
+      font-size: clamp(0.88rem, 2.3vw, 1.08rem);
+      letter-spacing: 0.4px;
+      box-shadow: 0 0 22px rgba(239, 68, 68, 0.75), 0 4px 12px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      max-width: 94%;
+      display: none;
+      animation: alarmPulse 0.55s ease-in-out infinite alternate;
+    }
+
+    #cockpit-alarm.active {
+      display: inline-block;
+    }
+
+    @keyframes alarmPulse {
+      0% { transform: scale(0.98); filter: brightness(1); }
+      100% { transform: scale(1.04); filter: brightness(1.18); }
+    }
+
+    /* Pesan Edukasi Singkat Mengambang */
+    #edu-toast {
+      background: rgba(254, 249, 195, 0.96);
+      border: 3px solid #facc15;
+      color: #854d0e;
+      border-radius: 999px;
+      padding: 7px 18px;
+      font-weight: 700;
+      font-size: clamp(0.86rem, 2.2vw, 1.02rem);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.14);
+      max-width: 92%;
+      text-align: center;
+      transition: opacity 0.28s ease, transform 0.28s ease;
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+
+    #edu-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Bar Kontrol Bawah: Kiri = Kecepatan, Kanan = Lampu Radar */
+    .hud-bottom {
+      width: 100%;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-bottom: 2px;
+    }
+
+    .speed-panel {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.9);
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      padding: 5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+    }
+
+    .btn-speed {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 13px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: clamp(0.82rem, 2.2vw, 0.98rem);
+      cursor: pointer;
+      background: #e2e8f0;
+      color: #334155;
+      transition: transform 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-speed:active {
+      transform: scale(0.95);
+    }
+
+    .btn-speed.active-slow {
+      background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 0 #15803d;
+    }
+
+    .btn-speed.active-normal {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 0 #0369a1;
+    }
+
+    .btn-speed.active-fast {
+      background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 0 #c2410c;
+    }
+
+    /* Sorotan berkedip saat Misi 4 meminta tekan Pelan */
+    .btn-speed.hint-pulse {
+      animation: slowHint 0.55s ease-in-out infinite alternate;
+      box-shadow: 0 0 0 4px #fde047, 0 0 18px #4ade80;
+    }
+
+    @keyframes slowHint {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
+    #btn-radar {
+      pointer-events: auto;
+      background: linear-gradient(180deg, #fde047 0%, #eab308 100%);
+      color: #713f12;
+      font-size: clamp(0.9rem, 2.3vw, 1.08rem);
+      padding: 10px 20px;
+      box-shadow: 0 5px 0 #a16207, 0 8px 18px rgba(234, 179, 8, 0.38);
+      border: 3px solid #fef9c3;
+    }
+
+    #btn-radar.active-radar {
+      background: linear-gradient(180deg, #86efac 0%, #22c55e 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 0 #15803d, 0 0 20px rgba(74, 222, 128, 0.72);
+      border-color: #dcfce7;
+    }
+
+    #btn-radar.cooldown {
+      opacity: 0.74;
+      filter: grayscale(0.35);
+      cursor: not-allowed;
+    }
+
+    /* =====================================================================
+       KARTU EDUKASI PRA-MISI & KUIS AKHIR MISI
+       ===================================================================== */
+    .briefing-icon {
+      font-size: 3.6rem;
+      margin-bottom: 6px;
+      display: inline-block;
+      animation: floatY 2.2s ease-in-out infinite;
+    }
+
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .edu-box {
+      background: #eff6ff;
+      border: 3px dashed #60a5fa;
+      border-radius: 20px;
+      padding: 13px 16px;
+      margin: 12px 0 18px;
+      font-size: clamp(0.96rem, 2.4vw, 1.14rem);
+      color: #1e3a8a;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .quiz-section {
+      background: #f0fdf4;
+      border: 3px solid #86efac;
+      border-radius: 22px;
+      padding: 13px 15px;
+      margin: 12px 0 16px;
+    }
+
+    .quiz-title {
+      font-size: 0.85rem;
+      color: #15803d;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .quiz-question {
+      font-size: clamp(0.96rem, 2.5vw, 1.15rem);
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 11px;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .quiz-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quiz-btn {
+      background: #ffffff;
+      border: 3px solid #cbd5e1;
+      border-radius: 18px;
+      padding: 11px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 0 #cbd5e1;
+      transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .quiz-btn:active {
+      transform: translateY(3px);
+    }
+
+    .quiz-btn .quiz-emoji {
+      font-size: 2rem;
+    }
+
+    .quiz-btn.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+      box-shadow: 0 4px 0 #16a34a;
+      color: #14532d;
+    }
+
+    .quiz-btn.wrong {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      box-shadow: 0 4px 0 #d97706;
+      color: #78350f;
+    }
+
+    .quiz-feedback {
+      margin-top: 9px;
+      font-weight: 700;
+      font-size: 0.96rem;
+      min-height: 22px;
+    }
+
+    .stars-display {
+      font-size: 2.3rem;
+      letter-spacing: 5px;
+      margin: 4px 0;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .controls-mini-note {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 10px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-wrapper">
+    <!-- KANVAS UTAMA GAME 2D -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- ===================================================================
+         HUD SAAT BERMAIN
+         =================================================================== -->
+    <div id="hud" class="hidden">
+      <div class="hud-top-stack">
+        <div class="hud-top">
+          <!-- 3 Nyawa & Skor Bintang -->
+          <div style="display:flex; gap:7px; align-items:center; flex-wrap:wrap;">
+            <div class="hud-pill" aria-label="Nyawa Pesawat">
+              <div class="hearts-container" id="hearts-ui"></div>
+            </div>
+            <div class="hud-pill" aria-label="Bintang Terkumpul">
+              <span>⭐</span>
+              <span id="stars-ui">0</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Jarak ke Tujuan -->
+          <div class="progress-box">
+            <div class="progress-labels">
+              <span id="hud-mission-name">Misi 1</span>
+              <span id="hud-goal-label">🆘 ➔ 🏁 Bandara</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+
+          <!-- Tombol Suara & Menu Utama -->
+          <div class="hud-actions">
+            <button class="btn-sound-pill" id="btn-mute-hud" aria-label="Toggle Suara">🔊 Suara</button>
+            <button class="btn-icon" id="btn-home-hud" title="Menu Utama" aria-label="Menu Utama">🏠</button>
+          </div>
+        </div>
+
+        <!-- Lampu Indikator Alarm Bahaya Kokpit -->
+        <div id="cockpit-alarm" role="status">⚠️ AWAS PETIR!</div>
+
+        <!-- Pesan Edukasi Singkat Mengambang -->
+        <div id="edu-toast">Ayo hindari awan gelap!</div>
+      </div>
+
+      <!-- Bar Kontrol Bawah: Panel Kecepatan (Kiri) & Lampu Radar (Kanan) -->
+      <div class="hud-bottom">
+        <div class="speed-panel" role="group" aria-label="Kontrol Kecepatan Pesawat">
+          <button class="btn-speed" id="btn-speed-0" data-speed="0">🐢 Pelan</button>
+          <button class="btn-speed active-normal" id="btn-speed-1" data-speed="1">✈️ Normal</button>
+          <button class="btn-speed" id="btn-speed-2" data-speed="2">🚀 Cepat</button>
+        </div>
+
+        <button class="btn" id="btn-radar" aria-label="Nyalakan Lampu Radar">
+          🔦 Lampu Radar
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         LAYAR MENU AWAL (4 MISI EDUKASI)
+         =================================================================== -->
+    <div id="screen-menu" class="overlay">
+      <div class="card">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:4px;">
+          <button class="btn-sound-pill" id="btn-mute-menu" aria-label="Toggle Suara">🔊 Suara</button>
+        </div>
+        <h1 class="game-title">✈️ Kapten Langit</h1>
+        <p class="game-subtitle">Misi Penyelamatan Pesawat • Untuk Usia 5–8 Tahun</p>
+
+        <div class="mission-grid" id="mission-grid">
+          <div class="mission-card selected" data-mission="0" role="button" tabindex="0">
+            <span class="mission-icon">⛈️</span>
+            <div class="mission-meta">
+              <div class="mission-badge-row"><span class="mission-num">Misi 1</span></div>
+              <span class="mission-name">Badai Petir</span>
+              <span class="mission-tag">Hindari awan Cumulonimbus</span>
+            </div>
+          </div>
+
+          <div class="mission-card" data-mission="1" role="button" tabindex="0">
+            <span class="mission-icon">🌫️</span>
+            <div class="mission-meta">
+              <div class="mission-badge-row"><span class="mission-num">Misi 2</span></div>
+              <span class="mission-name">Kabut Tebal</span>
+              <span class="mission-tag">Pakai Lampu Radar pesawat</span>
+            </div>
+          </div>
+
+          <div class="mission-card" data-mission="2" role="button" tabindex="0">
+            <span class="mission-icon">💨</span>
+            <div class="mission-meta">
+              <div class="mission-badge-row"><span class="mission-num">Misi 3</span></div>
+              <span class="mission-name">Angin Kencang</span>
+              <span class="mission-tag">Jaga stabilitas & tolong SOS</span>
+            </div>
+          </div>
+
+          <div class="mission-card" data-mission="3" role="button" tabindex="0">
+            <span class="mission-icon">🛬</span>
+            <div class="mission-meta">
+              <div class="mission-badge-row">
+                <span class="mission-num">Misi 4</span>
+                <span class="mission-new">BARU!</span>
+              </div>
+              <span class="mission-name">Pendaratan Darurat</span>
+              <span class="mission-tag">Turbulensi & mendarat pelan</span>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-start-menu">
+          🚀 Mulai Misi
+        </button>
+        <div class="controls-mini-note">
+          👆 Geser layar / ⬆️⬇️ terbang • ⬅️➡️ atur kecepatan • Spasi: Lampu Radar
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         KARTU EDUKASI SINGKAT PRA-MISI (BRIEFING)
+         =================================================================== -->
+    <div id="screen-briefing" class="overlay hidden">
+      <div class="card" style="max-width:550px;">
+        <div class="briefing-icon" id="brief-icon">⛈️</div>
+        <h2 class="game-title" style="font-size:clamp(1.45rem, 4vw, 2.15rem);" id="brief-title">
+          Misi 1: Badai Petir
+        </h2>
+        <div class="edu-box" id="brief-text">
+          Awan gelap membawa petir!
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-brief-back">⬅️ Kembali</button>
+          <button class="btn btn-success" id="btn-brief-fly">✈️ Ayo Terbang!</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         LAYAR MENANG + KUIS MINI EDUKASI
+         =================================================================== -->
+    <div id="screen-win" class="overlay hidden">
+      <div class="card" style="max-width:580px;">
+        <h2 class="game-title" style="font-size:clamp(1.55rem, 4.4vw, 2.3rem); color:#16a34a;">
+          🎉 Misi Berhasil!
+        </h2>
+        <div class="stars-display" id="win-stars">⭐⭐⭐</div>
+        <p id="win-summary" style="font-size:1rem; font-weight:600; color:#334155;">
+          Hebat! Kamu menyelamatkan pesawat SOS dan mendarat aman!
+        </p>
+
+        <!-- Kuis Edukasi 2 Pilihan Besar -->
+        <div class="quiz-section">
+          <div class="quiz-title">🧠 Kuis Kapten Cilik</div>
+          <div class="quiz-question" id="quiz-question">Pertanyaan kuis di sini?</div>
+          <div class="quiz-options" id="quiz-options"></div>
+          <div class="quiz-feedback" id="quiz-feedback"></div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-win-menu">🏠 Menu Utama</button>
+          <button class="btn btn-primary" id="btn-win-next">➡️ Misi Berikutnya</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================================================================
+         LAYAR ISTIRAHAT (JIKA 3 NYAWA HABIS - RAMAH & PENYEMANGAT)
+         =================================================================== -->
+    <div id="screen-rest" class="overlay hidden">
+      <div class="card" style="max-width:500px;">
+        <div class="briefing-icon">🛠️✈️</div>
+        <h2 class="game-title" style="font-size:clamp(1.45rem, 4vw, 2.15rem); color:#ea580c;">
+          Pesawat Butuh Istirahat!
+        </h2>
+        <div class="edu-box" style="background:#fff7ed; border-color:#fdba74; color:#9a3412;">
+          Tidak apa-apa, Kapten! Pesawat sudah diperbaiki lagi. Ayo coba terbang sekali lagi ya!
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-rest-menu">🏠 Menu Utama</button>
+          <button class="btn btn-success" id="btn-rest-retry">🔄 Coba Lagi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * =========================================================================
+     * KAPTEN LANGIT: MISI PENYELAMATAN
+     * Game Edukasi 2D HTML5 Canvas Mandiri untuk Anak Usia 5-8 Tahun
+     * Fitur: Audio Pesawat/Petir/Angin/Alarm Kokpit, Kontrol Kecepatan, 4 Misi
+     * =========================================================================
+     */
+
+    (function () {
+      'use strict';
+
+      // =======================================================================
+      // 1. KONFIGURASI 3 TINGKAT KECEPATAN & 4 MISI EDUKASI
+      // =======================================================================
+      const SPEED_LEVELS = [
+        { name: 'Pelan',  icon: '🐢', mult: 0.65, engineFreq: 56,  propRate: 24, agility: 13 },
+        { name: 'Normal', icon: '✈️', mult: 1.00, engineFreq: 80,  propRate: 38, agility: 11 },
+        { name: 'Cepat',  icon: '🚀', mult: 1.45, engineFreq: 112, propRate: 56, agility: 9.5 }
+      ];
+
+      const MISSIONS = [
+        {
+          id: 0,
+          shortName: 'Misi 1: Badai Petir',
+          goalLabel: '🆘 ➔ 🏁 Bandara',
+          title: 'Misi 1: Badai Petir',
+          icon: '⛈️',
+          briefing: 'Awan gelap (Cumulonimbus) membawa hujan deras dan petir! Geser pesawat untuk menghindar, kumpulkan bintang & P3K, lalu tolong pesawat SOS!',
+          startTip: '⛈️ Awas awan gelap berpetir! Hindari dan kumpulkan bintang ya!',
+          winMsg: 'Hebat! Kamu berhasil menghindari awan petir dan menolong pesawat SOS!',
+          theme: 'storm',
+          duration: 32,
+          hasSOS: true,
+          isEmergencyLanding: false,
+          windBase: 0.04,
+          quiz: {
+            question: 'Jika melihat awan gelap yang ada petirnya di langit, apa yang harus dilakukan pilot?',
+            options: [
+              { emoji: '✈️↩️', text: 'Menghindar ke tempat aman', correct: true },
+              { emoji: '⚡💥', text: 'Menabrak awan petir', correct: false }
+            ],
+            correctMsg: '🌟 Benar sekali! Pilot pintar selalu menghindari awan petir agar tetap aman!',
+            wrongMsg: '💡 Hampir tepat! Awan petir berbahaya, jadi pesawat harus menghindarinya ya!'
+          }
+        },
+        {
+          id: 1,
+          shortName: 'Misi 2: Kabut Tebal',
+          goalLabel: '🆘 ➔ 🏁 Bandara',
+          title: 'Misi 2: Menembus Kabut Tebal',
+          icon: '🌫️',
+          briefing: 'Langit tertutup kabut putih yang tebal! Tekan tombol "Lampu Radar" (atau Spasi) untuk menerangi jalan agar rintangan terlihat jelas.',
+          startTip: '🔦 Tekan tombol Lampu Radar untuk melihat menembus kabut!',
+          winMsg: 'Keren! Lampu radarmu berhasil menembus kabut tebal dengan aman!',
+          theme: 'fog',
+          duration: 34,
+          hasSOS: true,
+          isEmergencyLanding: false,
+          windBase: 0.065,
+          quiz: {
+            question: 'Alat apa yang membantu pilot melihat jalan saat terbang di kabut tebal?',
+            options: [
+              { emoji: '🔦📡', text: 'Lampu & Radar Pesawat', correct: true },
+              { emoji: '🕶️😴', text: 'Kacamata Hitam Gelap', correct: false }
+            ],
+            correctMsg: '🌟 Pintar! Lampu dan radar membantu pesawat melihat dengan jelas di dalam kabut!',
+            wrongMsg: '💡 Coba ingat lagi! Saat berkabut, pilot menyalakan Lampu & Radar pesawat.'
+          }
+        },
+        {
+          id: 2,
+          shortName: 'Misi 3: Angin Kencang',
+          goalLabel: '🆘 ➔ 🏁 Bandara',
+          title: 'Misi 3: Angin Kencang',
+          icon: '💨',
+          briefing: 'Angin bertiup kencang dan mendorong pesawat ke atas atau bawah! Atur posisi dan kecepatan pesawatmu agar tetap stabil sampai penyelamatan berhasil.',
+          startTip: '💨 Hati-hati hembusan angin! Atur kecepatan agar pesawat stabil!',
+          winMsg: 'Luar biasa, Kapten! Kamu menaklukkan angin kencang dan menolong pesawat SOS!',
+          theme: 'wind',
+          duration: 35,
+          hasSOS: true,
+          isEmergencyLanding: false,
+          windBase: 0.11,
+          quiz: {
+            question: 'Saat ada pesawat kecil mengirim sinyal "SOS" di langit, apa artinya?',
+            options: [
+              { emoji: '🆘🤝', text: 'Pesawat butuh pertolongan', correct: true },
+              { emoji: '🎉🎈', text: 'Pesawat sedang berpesta', correct: false }
+            ],
+            correctMsg: '🌟 Tepat sekali! Sinyal SOS adalah tanda darurat untuk meminta pertolongan!',
+            wrongMsg: '💡 Sinyal SOS artinya ada teman yang sedang butuh pertolongan cepat!'
+          }
+        },
+        {
+          id: 3,
+          shortName: 'Misi 4: Pendaratan Darurat',
+          goalLabel: '🌀 ➔ 🛬 Landasan Darurat',
+          title: 'Misi 4: Pendaratan Darurat',
+          icon: '🛬',
+          briefing: 'Cuaca sangat buruk dengan hujan deras, petir, dan turbulensi! Hindari pusaran turbulensi, lalu saat Landasan Darurat muncul, tekan "🐢 Pelan" dan ikuti jalur lampu hijau untuk mendarat aman!',
+          startTip: '🌀 Awas turbulensi & badai! Nanti tekan 🐢 Pelan saat mendarat darurat!',
+          winMsg: 'Luar biasa, Kapten Pemberani! Pendaratan daruratmu di cuaca buruk sangat mulus!',
+          theme: 'emergency',
+          duration: 34,
+          hasSOS: false,
+          isEmergencyLanding: true,
+          windBase: 0.125,
+          quiz: {
+            question: 'Saat melakukan pendaratan darurat di cuaca buruk, kecepatan pesawat sebaiknya bagaimana?',
+            options: [
+              { emoji: '🐢🛬', text: 'Diperlambat (Pelan) agar aman', correct: true },
+              { emoji: '🚀💥', text: 'Dipercepat sekuat tenaga', correct: false }
+            ],
+            correctMsg: '🌟 Hebat! Memperlambat pesawat membuat pendaratan darurat jauh lebih lembut dan aman!',
+            wrongMsg: '💡 Ingat ya, Kapten! Saat mendarat darurat, pesawat harus diperlambat (🐢 Pelan) agar aman.'
+          }
+        }
+      ];
+
+      // =======================================================================
+      // 2. MESIN AUDIO WEB AUDIO API (PESAWAT, PETIR, ANGIN, ALARM KOKPIT)
+      // =======================================================================
+      const AudioEngine = {
+        ctx: null,
+        muted: false,
+        noiseBuffer: null,
+
+        // Node kontinu mesin pesawat
+        engineOsc: null,
+        engineSubOsc: null,
+        engineLfo: null,
+        engineGain: null,
+        engineFilter: null,
+
+        // Node kontinu deru angin
+        windSource: null,
+        windFilter: null,
+        windGain: null,
+
+        // Status aktif kontinu
+        ambientRunning: false,
+        lastAlarmBeepTime: 0,
+
+        init() {
+          try {
+            if (!this.ctx) {
+              const AudioCtx = window.AudioContext || window.webkitAudioContext;
+              if (!AudioCtx) return;
+              this.ctx = new AudioCtx();
+              this._createNoiseBuffer();
+              this._setupContinuousNodes();
+            }
+            if (this.ctx.state === 'suspended') {
+              this.ctx.resume();
+            }
+          } catch (e) {
+            // Abaikan jika browser membatasi Web Audio
+          }
+        },
+
+        _createNoiseBuffer() {
+          const sr = this.ctx.sampleRate;
+          const length = sr * 2.5; // 2.5 detik buffer noise
+          const buffer = this.ctx.createBuffer(1, length, sr);
+          const data = buffer.getChannelData(0);
+          let b0 = 0, b1 = 0, b2 = 0;
+          // Pink-ish noise agar lebih halus di telinga anak
+          for (let i = 0; i < length; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.997 * b0 + white * 0.029;
+            b1 = 0.985 * b1 + white * 0.032;
+            b2 = 0.950 * b2 + white * 0.048;
+            data[i] = Math.max(-1, Math.min(1, (b0 + b1 + b2 + white * 0.18) * 1.4));
+          }
+          this.noiseBuffer = buffer;
+        },
+
+        _setupContinuousNodes() {
+          const ctx = this.ctx;
+
+          // --- 1. Suara Mesin Baling-Baling Pesawat ---
+          this.engineOsc = ctx.createOscillator();
+          this.engineSubOsc = ctx.createOscillator();
+          this.engineLfo = ctx.createOscillator();
+          const lfoGain = ctx.createGain();
+          this.engineFilter = ctx.createBiquadFilter();
+          this.engineGain = ctx.createGain();
+
+          this.engineOsc.type = 'sawtooth';
+          this.engineOsc.frequency.value = 80;
+
+          this.engineSubOsc.type = 'triangle';
+          this.engineSubOsc.frequency.value = 40;
+
+          // LFO untuk efek getaran baling-baling halus
+          this.engineLfo.type = 'sine';
+          this.engineLfo.frequency.value = 14;
+          lfoGain.gain.value = 10;
+          this.engineLfo.connect(lfoGain);
+          lfoGain.connect(this.engineOsc.frequency);
+
+          this.engineFilter.type = 'lowpass';
+          this.engineFilter.frequency.value = 230;
+
+          this.engineGain.gain.value = 0.0001;
+
+          this.engineOsc.connect(this.engineFilter);
+          this.engineSubOsc.connect(this.engineFilter);
+          this.engineFilter.connect(this.engineGain);
+          this.engineGain.connect(ctx.destination);
+
+          this.engineOsc.start();
+          this.engineSubOsc.start();
+          this.engineLfo.start();
+
+          // --- 2. Suara Deru Angin (Filtered Noise) ---
+          this.windSource = ctx.createBufferSource();
+          this.windSource.buffer = this.noiseBuffer;
+          this.windSource.loop = true;
+
+          this.windFilter = ctx.createBiquadFilter();
+          this.windFilter.type = 'bandpass';
+          this.windFilter.frequency.value = 380;
+          this.windFilter.Q.value = 1.4;
+
+          this.windGain = ctx.createGain();
+          this.windGain.gain.value = 0.0001;
+
+          this.windSource.connect(this.windFilter);
+          this.windFilter.connect(this.windGain);
+          this.windGain.connect(ctx.destination);
+          this.windSource.start();
+        },
+
+        updateContinuous(isFlying, speedIndex, windIntensity, turbulenceBoost) {
+          if (!this.ctx || !this.engineGain || !this.windGain) return;
+          const now = this.ctx.currentTime;
+
+          if (this.muted || !isFlying) {
+            this.engineGain.gain.setTargetAtTime(0.0001, now, 0.14);
+            this.windGain.gain.setTargetAtTime(0.0001, now, 0.14);
+            return;
+          }
+
+          const sp = SPEED_LEVELS[speedIndex] || SPEED_LEVELS[1];
+          // Pitch & getaran mesin mengikuti kecepatan pesawat
+          this.engineOsc.frequency.setTargetAtTime(sp.engineFreq, now, 0.18);
+          this.engineSubOsc.frequency.setTargetAtTime(sp.engineFreq * 0.5, now, 0.18);
+          this.engineLfo.frequency.setTargetAtTime(10 + speedIndex * 5, now, 0.18);
+          this.engineFilter.frequency.setTargetAtTime(190 + speedIndex * 70, now, 0.18);
+          this.engineGain.gain.setTargetAtTime(0.065 + speedIndex * 0.015, now, 0.18);
+
+          // Deru angin menguat saat angin kencang, kabut, atau turbulensi
+          const totalWind = Math.min(0.24, windIntensity + turbulenceBoost * 0.13 + speedIndex * 0.014);
+          this.windFilter.frequency.setTargetAtTime(300 + totalWind * 1900, now, 0.22);
+          this.windGain.gain.setTargetAtTime(totalWind, now, 0.2);
+        },
+
+        stopContinuous() {
+          if (!this.ctx || !this.engineGain || !this.windGain) return;
+          const now = this.ctx.currentTime;
+          this.engineGain.gain.setTargetAtTime(0.0001, now, 0.12);
+          this.windGain.gain.setTargetAtTime(0.0001, now, 0.12);
+        },
+
+        toggleMute() {
+          this.muted = !this.muted;
+          const label = this.muted ? '🔇 Diam' : '🔊 Suara';
+          document.getElementById('btn-mute-hud').textContent = label;
+          document.getElementById('btn-mute-menu').textContent = label;
+          if (this.muted) {
+            this.stopContinuous();
+          } else {
+            this.init();
+            this.playClick();
+          }
+        },
+
+        playTone(freq, type, duration, vol = 0.13, slideTo = null, delay = 0) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const now = this.ctx.currentTime + delay;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, now);
+            if (slideTo) {
+              osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+            }
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(vol, now + 0.018);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + duration + 0.03);
+          } catch (e) {}
+        },
+
+        playClick() {
+          this.playTone(540, 'sine', 0.08, 0.11, 760);
+        },
+
+        playSpeedShift(idx) {
+          const freqs = [360, 520, 740];
+          this.playTone(freqs[idx] || 520, 'triangle', 0.12, 0.13, (freqs[idx] || 520) * 1.18);
+        },
+
+        // 2. Suara Petir & Gemuruh Guntur (Crackle + Deep Rumble)
+        playThunder(intensity = 1.0) {
+          if (this.muted || !this.ctx || !this.noiseBuffer) return;
+          try {
+            const now = this.ctx.currentTime;
+            // Letupan listrik singkat (highpass)
+            const crackSrc = this.ctx.createBufferSource();
+            crackSrc.buffer = this.noiseBuffer;
+            const crackFilter = this.ctx.createBiquadFilter();
+            crackFilter.type = 'highpass';
+            crackFilter.frequency.value = 1100;
+            const crackGain = this.ctx.createGain();
+            crackGain.gain.setValueAtTime(0.001, now);
+            crackGain.gain.linearRampToValueAtTime(0.14 * intensity, now + 0.02);
+            crackGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            crackSrc.connect(crackFilter);
+            crackFilter.connect(crackGain);
+            crackGain.connect(this.ctx.destination);
+            crackSrc.start(now);
+            crackSrc.stop(now + 0.25);
+
+            // Gemuruh guntur dalam (lowpass)
+            const rumbleSrc = this.ctx.createBufferSource();
+            rumbleSrc.buffer = this.noiseBuffer;
+            const rumbleFilter = this.ctx.createBiquadFilter();
+            rumbleFilter.type = 'lowpass';
+            rumbleFilter.frequency.setValueAtTime(260, now);
+            rumbleFilter.frequency.exponentialRampToValueAtTime(68, now + 1.35);
+            const rumbleGain = this.ctx.createGain();
+            rumbleGain.gain.setValueAtTime(0.001, now);
+            rumbleGain.gain.linearRampToValueAtTime(0.24 * intensity, now + 0.08);
+            rumbleGain.gain.exponentialRampToValueAtTime(0.001, now + 1.45);
+            rumbleSrc.connect(rumbleFilter);
+            rumbleFilter.connect(rumbleGain);
+            rumbleGain.connect(this.ctx.destination);
+            rumbleSrc.start(now + 0.03);
+            rumbleSrc.stop(now + 1.5);
+          } catch (e) {}
+        },
+
+        // 4. Alarm Bahaya Kokpit Ala Pesawat (BEEP-BEEP / WHOOP-WHOOP ritmis ramah anak)
+        playCockpitAlarm(style = 'beep') {
+          if (this.muted || !this.ctx) return;
+          const nowMs = performance.now();
+          if (nowMs - this.lastAlarmBeepTime < 720) return;
+          this.lastAlarmBeepTime = nowMs;
+
+          if (style === 'whoop') {
+            // WHOOP-WHOOP lembut untuk turbulensi / kecepatan pendaratan
+            this.playTone(540, 'triangle', 0.16, 0.11, 880, 0);
+            this.playTone(540, 'triangle', 0.16, 0.11, 880, 0.22);
+          } else {
+            // BEEP-BEEP ritmis khas kokpit
+            this.playTone(820, 'sine', 0.11, 0.11, null, 0);
+            this.playTone(660, 'sine', 0.11, 0.10, null, 0.16);
+          }
+        },
+
+        playStar() {
+          this.playTone(660, 'triangle', 0.11, 0.14, 880, 0);
+          this.playTone(990, 'triangle', 0.15, 0.13, 1320, 0.07);
+        },
+
+        playHeal() {
+          this.playTone(523, 'sine', 0.11, 0.13, null, 0);
+          this.playTone(659, 'sine', 0.11, 0.13, null, 0.08);
+          this.playTone(784, 'sine', 0.2, 0.15, null, 0.16);
+        },
+
+        playRadar() {
+          this.playTone(460, 'sine', 0.25, 0.13, 940, 0);
+          this.playTone(920, 'sine', 0.3, 0.09, 1240, 0.12);
+        },
+
+        playHit() {
+          this.playTone(185, 'triangle', 0.22, 0.16, 72, 0);
+          this.playTone(125, 'sine', 0.26, 0.13, 58, 0.05);
+        },
+
+        playWindPush() {
+          this.playTone(280, 'sine', 0.24, 0.09, 540, 0);
+        },
+
+        playRescue() {
+          [523, 659, 784, 1046].forEach((n, idx) => {
+            this.playTone(n, 'triangle', 0.17, 0.15, null, idx * 0.085);
+          });
+        },
+
+        playApplause() {
+          if (this.muted || !this.ctx || !this.noiseBuffer) return;
+          try {
+            // Tepuk tangan ceria sintetis (beberapa tepukan bandpass noise)
+            for (let i = 0; i < 8; i++) {
+              const t = this.ctx.currentTime + i * 0.11 + Math.random() * 0.03;
+              const src = this.ctx.createBufferSource();
+              src.buffer = this.noiseBuffer;
+              const flt = this.ctx.createBiquadFilter();
+              flt.type = 'bandpass';
+              flt.frequency.value = 1100 + Math.random() * 500;
+              flt.Q.value = 2.0;
+              const g = this.ctx.createGain();
+              g.gain.setValueAtTime(0.001, t);
+              g.gain.linearRampToValueAtTime(0.09, t + 0.015);
+              g.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+              src.connect(flt);
+              flt.connect(g);
+              g.connect(this.ctx.destination);
+              src.start(t);
+              src.stop(t + 0.13);
+            }
+          } catch (e) {}
+        },
+
+        playWin() {
+          const notes = [523, 659, 784, 659, 1046];
+          const times = [0, 0.11, 0.22, 0.34, 0.45];
+          notes.forEach((n, idx) => {
+            this.playTone(n, 'triangle', idx === 4 ? 0.44 : 0.15, 0.16, null, times[idx]);
+          });
+          this.playApplause();
+        }
+      };
+
+      // =======================================================================
+      // 3. HELPER KANVAS AMAN (ANTI ERROR RADIUS NEGATIF DI IFRAME)
+      // =======================================================================
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+
+      function safeArc(x, y, radius, startAngle, endAngle, counterclockwise = false) {
+        const r = Math.max(1, Number.isFinite(radius) ? radius : 1);
+        ctx.arc(x, y, r, startAngle, endAngle, counterclockwise);
+      }
+
+      const ui = {
+        hud: document.getElementById('hud'),
+        hearts: document.getElementById('hearts-ui'),
+        stars: document.getElementById('stars-ui'),
+        progressFill: document.getElementById('progress-fill'),
+        hudMissionName: document.getElementById('hud-mission-name'),
+        hudGoalLabel: document.getElementById('hud-goal-label'),
+        cockpitAlarm: document.getElementById('cockpit-alarm'),
+        eduToast: document.getElementById('edu-toast'),
+        btnRadar: document.getElementById('btn-radar'),
+        speedButtons: [
+          document.getElementById('btn-speed-0'),
+          document.getElementById('btn-speed-1'),
+          document.getElementById('btn-speed-2')
+        ],
+        screenMenu: document.getElementById('screen-menu'),
+        screenBriefing: document.getElementById('screen-briefing'),
+        screenWin: document.getElementById('screen-win'),
+        screenRest: document.getElementById('screen-rest'),
+        briefIcon: document.getElementById('brief-icon'),
+        briefTitle: document.getElementById('brief-title'),
+        briefText: document.getElementById('brief-text'),
+        winStars: document.getElementById('win-stars'),
+        winSummary: document.getElementById('win-summary'),
+        quizQuestion: document.getElementById('quiz-question'),
+        quizOptions: document.getElementById('quiz-options'),
+        quizFeedback: document.getElementById('quiz-feedback'),
+        btnWinNext: document.getElementById('btn-win-next')
+      };
+
+      let W = window.innerWidth || 0;
+      let H = window.innerHeight || 0;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      function resizeCanvas() {
+        W = window.innerWidth || 0;
+        H = window.innerHeight || 0;
+        if (W <= 0 || H <= 0) return;
+
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(W * dpr);
+        canvas.height = Math.floor(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        if (game.player) {
+          game.player.x = Math.max(72, Math.min(W * 0.21, 175));
+          game.player.y = Math.max(85, Math.min(game.player.y, H - 95));
+          game.player.targetY = Math.max(85, Math.min(game.player.targetY, H - 95));
+        }
+      }
+
+      // =======================================================================
+      // 4. STATE GAME & ENTITAS
+      // =======================================================================
+      const game = {
+        state: 'MENU', // MENU, BRIEFING, PLAYING, APPROACH, LANDING, WIN, REST
+        selectedMission: 0,
+        mission: MISSIONS[0],
+        time: 0,
+        distanceDone: 0,
+        progress: 0, // 0..1
+        hearts: 3,
+        maxHearts: 3,
+        stars: 0,
+        speedIndex: 1, // 0 = Pelan, 1 = Normal, 2 = Cepat
+
+        // Radar state
+        radarTimer: 0,
+        radarCooldown: 0,
+
+        // Cuaca & efek dramatis
+        skyLightningAlpha: 0,
+        skyLightningTimer: 4.5,
+        shakeTime: 0,
+        shakeStrength: 0,
+        turbulenceBoost: 0,
+
+        // Alarm kokpit & pesan edukasi
+        alarmText: '',
+        alarmTimer: 0,
+        toastTimer: 0,
+
+        // Input
+        keys: { up: false, down: false },
+        pointerActive: false,
+
+        // Pesawat Pemain
+        player: {
+          x: 130,
+          y: 250,
+          targetY: 250,
+          angle: 0,
+          invuln: 0,
+          propAngle: 0,
+          radius: 27
+        },
+
+        // Objek dunia
+        bgClouds: [],
+        hillsOffset: 0,
+        rainDrops: [],
+        windLines: [],
+        obstacles: [],
+        collectibles: [],
+        particles: [],
+        confetti: [],
+
+        // Penyelamatan & Bandara / Landasan Darurat
+        sosPlane: null,
+        parachute: null,
+        sosRescued: false,
+        airport: null,
+
+        // Timer spawn
+        spawnObsTimer: 0,
+        spawnItemTimer: 0
+      };
+
+      // =======================================================================
+      // 5. FUNGSI PEMBANTU UI, KECEPATAN, & ALARM KOKPIT
+      // =======================================================================
+      function setSpeed(idx, playSfx = true) {
+        const clamped = Math.max(0, Math.min(2, idx));
+        if (game.speedIndex !== clamped && playSfx) {
+          AudioEngine.init();
+          AudioEngine.playSpeedShift(clamped);
+        }
+        game.speedIndex = clamped;
+        updateSpeedUI();
+      }
+
+      function updateSpeedUI() {
+        const classes = ['active-slow', 'active-normal', 'active-fast'];
+        ui.speedButtons.forEach((btn, idx) => {
+          btn.classList.remove('active-slow', 'active-normal', 'active-fast');
+          if (idx === game.speedIndex) {
+            btn.classList.add(classes[idx]);
+          }
+        });
+
+        // Sorot tombol Pelan saat fase pendekatan pendaratan darurat jika belum Pelan
+        const needSlow = game.state === 'APPROACH' && game.speedIndex > 0;
+        ui.speedButtons[0].classList.toggle('hint-pulse', needSlow);
+      }
+
+      function triggerAlarm(text, style = 'beep', duration = 1.1) {
+        game.alarmText = text;
+        game.alarmTimer = Math.max(game.alarmTimer, duration);
+        ui.cockpitAlarm.textContent = text;
+        ui.cockpitAlarm.classList.add('active');
+        AudioEngine.playCockpitAlarm(style);
+      }
+
+      function clearAlarm() {
+        game.alarmTimer = 0;
+        game.alarmText = '';
+        ui.cockpitAlarm.classList.remove('active');
+      }
+
+      function showToast(msg, duration = 3.5) {
+        ui.eduToast.textContent = msg;
+        ui.eduToast.classList.add('show');
+        game.toastTimer = duration;
+      }
+
+      function updateHUD() {
+        let heartsHTML = '';
+        for (let i = 0; i < game.maxHearts; i++) {
+          heartsHTML += i < game.hearts ? '❤️' : '🤍';
+        }
+        ui.hearts.innerHTML = heartsHTML;
+        ui.stars.textContent = game.stars;
+        ui.progressFill.style.width = `${Math.min(100, Math.round(game.progress * 100))}%`;
+
+        if (game.radarTimer > 0) {
+          ui.btnRadar.classList.add('active-radar');
+          ui.btnRadar.classList.remove('cooldown');
+          ui.btnRadar.textContent = `🔦 Radar (${Math.ceil(game.radarTimer)}d)`;
+        } else if (game.radarCooldown > 0) {
+          ui.btnRadar.classList.remove('active-radar');
+          ui.btnRadar.classList.add('cooldown');
+          ui.btnRadar.textContent = `⏳ Tunggu (${Math.ceil(game.radarCooldown)}d)`;
+        } else {
+          ui.btnRadar.classList.remove('active-radar', 'cooldown');
+          ui.btnRadar.textContent = '🔦 Lampu Radar';
+        }
+      }
+
+      function hideAllScreens() {
+        ui.screenMenu.classList.add('hidden');
+        ui.screenBriefing.classList.add('hidden');
+        ui.screenWin.classList.add('hidden');
+        ui.screenRest.classList.add('hidden');
+      }
+
+      function goToMenu() {
+        AudioEngine.playClick();
+        AudioEngine.stopContinuous();
+        clearAlarm();
+        game.state = 'MENU';
+        hideAllScreens();
+        ui.hud.classList.add('hidden');
+        ui.screenMenu.classList.remove('hidden');
+        game.confetti = [];
+        initAmbientBackground();
+      }
+
+      function openBriefing(missionIndex) {
+        AudioEngine.init();
+        AudioEngine.playClick();
+        AudioEngine.stopContinuous();
+        clearAlarm();
+
+        game.selectedMission = missionIndex;
+        game.mission = MISSIONS[missionIndex];
+        game.state = 'BRIEFING';
+
+        ui.briefIcon.textContent = game.mission.icon;
+        ui.briefTitle.textContent = game.mission.title;
+        ui.briefText.textContent = game.mission.briefing;
+
+        hideAllScreens();
+        ui.hud.classList.add('hidden');
+        ui.screenBriefing.classList.remove('hidden');
+      }
+
+      function startMission() {
+        AudioEngine.init();
+        AudioEngine.playClick();
+        clearAlarm();
+
+        const m = game.mission;
+        game.state = 'PLAYING';
+        game.distanceDone = 0;
+        game.progress = 0;
+        game.hearts = game.maxHearts;
+        game.stars = 0;
+        game.speedIndex = 1; // Mulai dari Normal
+        game.radarTimer = 0;
+        game.radarCooldown = 0;
+        game.skyLightningAlpha = 0;
+        game.skyLightningTimer = m.theme === 'emergency' ? 3.2 : 5.0;
+        game.shakeTime = 0;
+        game.shakeStrength = 0;
+        game.turbulenceBoost = 0;
+
+        game.obstacles = [];
+        game.collectibles = [];
+        game.particles = [];
+        game.confetti = [];
+        game.sosPlane = null;
+        game.parachute = null;
+        game.sosRescued = false;
+        game.airport = null;
+        game.spawnObsTimer = 1.3;
+        game.spawnItemTimer = 0.9;
+
+        game.player.x = Math.max(72, Math.min(W * 0.21, 175));
+        game.player.y = H * 0.44;
+        game.player.targetY = H * 0.44;
+        game.player.angle = 0;
+        game.player.invuln = 1.4;
+
+        initWeatherParticles(m.theme);
+
+        ui.hudMissionName.textContent = m.shortName;
+        ui.hudGoalLabel.textContent = m.goalLabel;
+        hideAllScreens();
+        ui.hud.classList.remove('hidden');
+        updateSpeedUI();
+        updateHUD();
+        showToast(m.startTip, 4.2);
+      }
+
+      function activateRadar() {
+        if (game.state !== 'PLAYING' && game.state !== 'APPROACH') return;
+        if (game.radarTimer > 0 || game.radarCooldown > 0) return;
+
+        AudioEngine.init();
+        AudioEngine.playRadar();
+        game.radarTimer = 6.5;
+        game.radarCooldown = 2.5;
+        showToast('🔦 Lampu Radar menyala! Cuaca gelap & kabut terlihat jelas!', 2.6);
+        updateHUD();
+      }
+
+      function triggerWin() {
+        game.state = 'WIN';
+        clearAlarm();
+        AudioEngine.stopContinuous();
+        AudioEngine.playWin();
+        ui.hud.classList.add('hidden');
+        ui.speedButtons[0].classList.remove('hint-pulse');
+
+        // 1-3 bintang pencapaian
+        const starCount = game.hearts === 3 ? 3 : (game.hearts === 2 ? 2 : 1);
+        ui.winStars.textContent = '⭐'.repeat(starCount) + '☆'.repeat(3 - starCount);
+        ui.winSummary.textContent = `${game.mission.winMsg} (Bintang: ${game.stars} ⭐)`;
+
+        // Kuis Mini Edukasi
+        const q = game.mission.quiz;
+        ui.quizQuestion.textContent = q.question;
+        ui.quizFeedback.textContent = '';
+        ui.quizOptions.innerHTML = '';
+
+        const opts = [...q.options];
+        if (Math.random() > 0.5) opts.reverse();
+
+        opts.forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-btn';
+          btn.innerHTML = `<span class="quiz-emoji">${opt.emoji}</span><span>${opt.text}</span>`;
+          btn.addEventListener('click', () => {
+            AudioEngine.init();
+            Array.from(ui.quizOptions.children).forEach(b => b.classList.remove('correct', 'wrong'));
+            if (opt.correct) {
+              btn.classList.add('correct');
+              ui.quizFeedback.style.color = '#15803d';
+              ui.quizFeedback.textContent = q.correctMsg;
+              AudioEngine.playStar();
+              AudioEngine.playApplause();
+              spawnConfetti(40);
+            } else {
+              btn.classList.add('wrong');
+              ui.quizFeedback.style.color = '#b45309';
+              ui.quizFeedback.textContent = q.wrongMsg;
+              AudioEngine.playClick();
+            }
+          });
+          ui.quizOptions.appendChild(btn);
+        });
+
+        ui.btnWinNext.textContent = (game.selectedMission < MISSIONS.length - 1)
+          ? '➡️ Misi Berikutnya'
+          : '🔄 Main Lagi dari Misi 1';
+
+        spawnConfetti(95);
+        ui.screenWin.classList.remove('hidden');
+      }
+
+      function triggerRest() {
+        game.state = 'REST';
+        clearAlarm();
+        AudioEngine.stopContinuous();
+        ui.hud.classList.add('hidden');
+        ui.screenRest.classList.remove('hidden');
+      }
+
+      // =======================================================================
+      // 6. INISIALISASI LATAR & PARTIKEL CUACA
+      // =======================================================================
+      function initAmbientBackground() {
+        game.bgClouds = [];
+        for (let i = 0; i < 8; i++) {
+          game.bgClouds.push({
+            x: Math.random() * Math.max(W, 600),
+            y: 48 + Math.random() * Math.max(120, H * 0.44),
+            scale: 0.6 + Math.random() * 0.85,
+            speed: 22 + Math.random() * 34
+          });
+        }
+      }
+
+      function initWeatherParticles(theme) {
+        game.rainDrops = [];
+        game.windLines = [];
+        if (theme === 'storm' || theme === 'emergency') {
+          const dropCount = theme === 'emergency' ? 95 : 65;
+          for (let i = 0; i < dropCount; i++) {
+            game.rainDrops.push({
+              x: Math.random() * Math.max(W, 800),
+              y: Math.random() * Math.max(H, 600),
+              len: 13 + Math.random() * 15,
+              speed: (theme === 'emergency' ? 460 : 380) + Math.random() * 220
+            });
+          }
+        }
+        if (theme === 'wind' || theme === 'emergency') {
+          for (let i = 0; i < 24; i++) {
+            game.windLines.push({
+              x: Math.random() * Math.max(W, 800),
+              y: 60 + Math.random() * Math.max(150, H - 150),
+              len: 48 + Math.random() * 75,
+              speed: 350 + Math.random() * 190
+            });
+          }
+        }
+      }
+
+      function spawnConfetti(count) {
+        const colors = ['#ef4444', '#facc15', '#4ade80', '#38bdf8', '#c084fc', '#fb923c'];
+        for (let i = 0; i < count; i++) {
+          game.confetti.push({
+            x: Math.random() * W,
+            y: -20 - Math.random() * 160,
+            vx: (Math.random() - 0.5) * 140,
+            vy: 110 + Math.random() * 180,
+            size: 7 + Math.random() * 7,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            rot: Math.random() * Math.PI * 2,
+            vrot: (Math.random() - 0.5) * 8
+          });
+        }
+      }
+
+      function spawnBurstParticles(x, y, color, count = 12) {
+        for (let i = 0; i < count; i++) {
+          const ang = (Math.PI * 2 * i) / count + Math.random() * 0.4;
+          const spd = 60 + Math.random() * 110;
+          game.particles.push({
+            x, y,
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd,
+            life: 0.48 + Math.random() * 0.34,
+            maxLife: 0.82,
+            size: 4 + Math.random() * 5,
+            color
+          });
+        }
+      }
+
+      // =======================================================================
+      // 7. SPAWN RINTANGAN, ZONA TURBULENSI & OBJEK POSITIF
+      // =======================================================================
+      function spawnObstacle() {
+        const safeTop = 100;
+        const safeBottom = Math.max(safeTop + 80, H - 125);
+        const y = safeTop + Math.random() * (safeBottom - safeTop);
+        const theme = game.mission.theme;
+
+        if (theme === 'storm') {
+          game.obstacles.push({
+            type: 'stormCloud',
+            x: W + 90,
+            y,
+            radius: 36,
+            speed: 195 + Math.random() * 50,
+            lightningTimer: Math.random() * 2,
+            warned: false
+          });
+        } else if (theme === 'fog') {
+          const isBalloon = Math.random() > 0.52;
+          game.obstacles.push({
+            type: isBalloon ? 'balloon' : 'stormCloud',
+            x: W + 90,
+            y,
+            radius: isBalloon ? 30 : 34,
+            speed: 185 + Math.random() * 45,
+            bobOffset: Math.random() * Math.PI * 2,
+            warned: false
+          });
+        } else if (theme === 'wind') {
+          const isWhirl = Math.random() > 0.3;
+          game.obstacles.push({
+            type: isWhirl ? 'whirlwind' : 'stormCloud',
+            x: W + 90,
+            y,
+            radius: 34,
+            speed: 220 + Math.random() * 60,
+            spin: 0,
+            pushDir: Math.random() > 0.5 ? -1 : 1,
+            warned: false
+          });
+        } else {
+          // Misi 4: Pendaratan Darurat -> Zona Turbulensi & Awan Badai Petir
+          const isTurbulence = Math.random() > 0.4;
+          game.obstacles.push({
+            type: isTurbulence ? 'turbulence' : 'stormCloud',
+            x: W + 95,
+            y,
+            radius: isTurbulence ? 44 : 36,
+            speed: 215 + Math.random() * 55,
+            spin: 0,
+            pushDir: Math.random() > 0.5 ? -1 : 1,
+            lightningTimer: Math.random() * 2,
+            warned: false
+          });
+        }
+      }
+
+      function spawnCollectible() {
+        const safeTop = 100;
+        const safeBottom = Math.max(safeTop + 80, H - 125);
+        const y = safeTop + Math.random() * (safeBottom - safeTop);
+        const needHeal = game.hearts < game.maxHearts && Math.random() < 0.34;
+        game.collectibles.push({
+          type: needHeal ? 'medkit' : 'star',
+          x: W + 60,
+          y,
+          radius: 22,
+          speed: 185,
+          bob: Math.random() * Math.PI * 2
+        });
+      }
+
+      // =======================================================================
+      // 8. UPDATE LOGIKA GAME
+      // =======================================================================
+      function update(dt) {
+        game.time += dt;
+        const sp = SPEED_LEVELS[game.speedIndex];
+        const isFlying = (game.state === 'PLAYING' || game.state === 'APPROACH' || game.state === 'LANDING');
+        const speedMult = isFlying ? sp.mult : 0.45;
+
+        // Update audio mesin & angin secara kontinu
+        AudioEngine.updateContinuous(
+          isFlying,
+          game.speedIndex,
+          isFlying ? game.mission.windBase : 0,
+          game.turbulenceBoost
+        );
+
+        // Redakan efek turbulensi & guncangan layar perlahan
+        game.turbulenceBoost = Math.max(0, game.turbulenceBoost - dt * 1.4);
+        if (game.shakeTime > 0) game.shakeTime = Math.max(0, game.shakeTime - dt);
+        if (game.skyLightningAlpha > 0) game.skyLightningAlpha = Math.max(0, game.skyLightningAlpha - dt * 2.2);
+
+        // Awan latar parallax
+        game.bgClouds.forEach(c => {
+          c.x -= c.speed * speedMult * dt;
+          if (c.x < -150) {
+            c.x = W + 120;
+            c.y = 48 + Math.random() * Math.max(100, H * 0.44);
+          }
+        });
+
+        // Bukit bergerak mengikuti kecepatan pesawat
+        game.hillsOffset = (game.hillsOffset + 115 * speedMult * dt) % 320;
+
+        // Konfeti perayaan
+        if (game.confetti.length > 0) {
+          for (let i = game.confetti.length - 1; i >= 0; i--) {
+            const c = game.confetti[i];
+            c.x += c.vx * dt;
+            c.y += c.vy * dt;
+            c.rot += c.vrot * dt;
+            if (c.y > H + 40) game.confetti.splice(i, 1);
+          }
+        }
+
+        // Animasi pesawat melayang di Menu / Briefing
+        if (game.state === 'MENU' || game.state === 'BRIEFING') {
+          game.player.propAngle += dt * 34;
+          game.player.x = Math.max(70, W * 0.17);
+          game.player.y = H * 0.34 + Math.sin(game.time * 2.2) * 16;
+          game.player.angle = Math.cos(game.time * 2.2) * 0.08;
+          return;
+        }
+
+        if (!isFlying) return;
+
+        // Timer Toast & Alarm Kokpit
+        if (game.toastTimer > 0) {
+          game.toastTimer -= dt;
+          if (game.toastTimer <= 0) ui.eduToast.classList.remove('show');
+        }
+        if (game.alarmTimer > 0) {
+          game.alarmTimer -= dt;
+          if (game.alarmTimer <= 0) clearAlarm();
+        }
+
+        // Petir langit berkala pada Misi 1 & Misi 4
+        if (game.mission.theme === 'storm' || game.mission.theme === 'emergency') {
+          game.skyLightningTimer -= dt;
+          if (game.skyLightningTimer <= 0) {
+            game.skyLightningAlpha = game.mission.theme === 'emergency' ? 0.65 : 0.45;
+            AudioEngine.playThunder(game.mission.theme === 'emergency' ? 0.95 : 0.7);
+            game.skyLightningTimer = (game.mission.theme === 'emergency' ? 4.2 : 6.0) + Math.random() * 3.5;
+          }
+        }
+
+        // Partikel hujan & angin
+        game.rainDrops.forEach(r => {
+          r.x -= r.speed * 0.38 * speedMult * dt;
+          r.y += r.speed * dt;
+          if (r.y > H) {
+            r.y = -20;
+            r.x = Math.random() * (W + 180);
+          }
+        });
+        game.windLines.forEach(w => {
+          w.x -= w.speed * speedMult * dt;
+          if (w.x + w.len < 0) {
+            w.x = W + 40;
+            w.y = 60 + Math.random() * Math.max(120, H - 150);
+          }
+        });
+
+        // Partikel efek
+        for (let i = game.particles.length - 1; i >= 0; i--) {
+          const pt = game.particles[i];
+          pt.x += pt.vx * dt;
+          pt.y += pt.vy * dt;
+          pt.life -= dt;
+          if (pt.life <= 0) game.particles.splice(i, 1);
+        }
+
+        const p = game.player;
+        p.propAngle += dt * sp.propRate;
+        if (p.invuln > 0) p.invuln -= dt;
+
+        // Timer Radar
+        if (game.radarTimer > 0) {
+          game.radarTimer = Math.max(0, game.radarTimer - dt);
+        } else if (game.radarCooldown > 0) {
+          game.radarCooldown = Math.max(0, game.radarCooldown - dt);
+        }
+
+        // Jejak awan kecil di belakang pesawat
+        if (Math.random() < 0.38) {
+          game.particles.push({
+            x: p.x - 34,
+            y: p.y + (Math.random() - 0.5) * 8,
+            vx: -95 * speedMult - Math.random() * 35,
+            vy: (Math.random() - 0.5) * 14,
+            life: 0.42,
+            maxLife: 0.42,
+            size: 5 + Math.random() * 4,
+            color: 'rgba(255,255,255,0.75)'
+          });
+        }
+
+        // =====================================================================
+        // FASE MENDARAT MULUS DI BANDARA (SEMUA MISI)
+        // =====================================================================
+        if (game.state === 'LANDING') {
+          const runwayY = H - 78;
+          if (game.airport && game.airport.x > W * 0.28) {
+            game.airport.x -= 210 * dt;
+          }
+          p.x += (W * 0.50 - p.x) * 1.8 * dt;
+          p.y += (runwayY - p.y) * 2.6 * dt;
+          p.angle += (0 - p.angle) * 4.5 * dt;
+
+          // Asap roda kecil saat hampir menyentuh landasan
+          if (Math.abs(p.y - runwayY) < 12 && Math.random() < 0.4) {
+            spawnBurstParticles(p.x - 6, p.y + 16, 'rgba(255,255,255,0.85)', 3);
+          }
+
+          if (Math.abs(p.y - runwayY) < 6 && Math.abs(p.x - W * 0.50) < 28) {
+            triggerWin();
+          }
+          return;
+        }
+
+        // =====================================================================
+        // KONTROL GERAK PESAWAT (NAIK/TURUN)
+        // =====================================================================
+        const keySpeed = Math.max(300, H * 0.62);
+        if (game.keys.up) p.targetY -= keySpeed * dt;
+        if (game.keys.down) p.targetY += keySpeed * dt;
+
+        const minY = 86;
+        const maxY = H - 104;
+        p.targetY = Math.max(minY, Math.min(maxY, p.targetY));
+
+        const prevY = p.y;
+        p.y += (p.targetY - p.y) * Math.min(1, dt * sp.agility);
+        const dy = (p.y - prevY) / Math.max(dt, 0.001);
+        const desiredAngle = Math.max(-0.28, Math.min(0.28, dy * 0.00072));
+        p.angle += (desiredAngle - p.angle) * Math.min(1, dt * 12);
+
+        // =====================================================================
+        // FASE PENDEKATAN LANDASAN DARURAT (KHUSUS MISI 4)
+        // =====================================================================
+        if (game.state === 'APPROACH') {
+          const runwayY = H - 78;
+          // Landasan darurat meluncur mendekat
+          if (game.airport) {
+            const approachSpd = (game.speedIndex === 0 ? 115 : 175);
+            game.airport.x = Math.max(W * 0.30, game.airport.x - approachSpd * dt);
+          }
+
+          // Cek apakah kecepatan sudah diturunkan ke Pelan (speedIndex === 0)
+          if (game.speedIndex > 0) {
+            triggerAlarm('⚠️ TEKAN 🐢 PELAN UNTUK MENDARAT AMAN!', 'whoop', 0.9);
+            updateSpeedUI();
+          } else {
+            // Kecepatan sudah Pelan -> pandu pesawat sejajar landasan hijau!
+            updateSpeedUI();
+            if (game.alarmText.includes('PELAN')) clearAlarm();
+
+            const distToRunwayY = Math.abs(p.y - runwayY);
+            const runwayReady = game.airport && game.airport.x <= W * 0.48;
+            if (runwayReady && distToRunwayY < 115) {
+              // Masuk sentuhan akhir mendarat mulus!
+              game.progress = 1;
+              game.state = 'LANDING';
+              showToast('🛬 Bagus! Kecepatan pelan, mendarat mulus di Landasan Darurat!', 3.2);
+              updateHUD();
+              return;
+            }
+          }
+
+          game.progress = Math.min(0.98, game.progress + (dt / game.mission.duration) * 0.55);
+          updateHUD();
+          return;
+        }
+
+        // =====================================================================
+        // FASE BERMAIN UTAMA (PLAYING)
+        // =====================================================================
+        // Jarak tempuh maju sesuai kecepatan pesawat
+        game.distanceDone += dt * sp.mult;
+        game.progress = Math.min(1, game.distanceDone / game.mission.duration);
+
+        // Peringatan alarm kokpit jika nyawa tinggal 1
+        if (game.hearts === 1 && game.alarmTimer <= 0.1) {
+          triggerAlarm('⚠️ NYAWA TINGGAL 1! HATI-HATI YA!', 'beep', 1.2);
+        }
+
+        // Spawn rintangan & bintang (berhenti mendekati akhir)
+        const stopSpawnAt = game.mission.isEmergencyLanding ? 0.75 : 0.84;
+        if (game.progress < stopSpawnAt) {
+          game.spawnObsTimer -= dt * sp.mult;
+          if (game.spawnObsTimer <= 0) {
+            spawnObstacle();
+            game.spawnObsTimer = 1.6 + Math.random() * 0.7;
+          }
+
+          game.spawnItemTimer -= dt * sp.mult;
+          if (game.spawnItemTimer <= 0) {
+            spawnCollectible();
+            game.spawnItemTimer = 1.5 + Math.random() * 0.75;
+          }
+        }
+
+        // Pesawat SOS (Misi 1, 2, 3)
+        if (game.mission.hasSOS && game.progress >= 0.72 && !game.sosPlane) {
+          game.sosPlane = {
+            x: W + 80,
+            y: H * 0.46,
+            rescued: false,
+            bob: 0
+          };
+          showToast('🆘 Pesawat kecil butuh bantuan! Terbang mendekat ya!', 3.8);
+        }
+
+        if (game.sosPlane) {
+          const sos = game.sosPlane;
+          sos.bob += dt * 4;
+          if (!sos.rescued) {
+            const targetX = Math.max(p.x + 130, W * 0.56);
+            sos.x += (targetX - sos.x) * dt * 1.6;
+            sos.y = H * 0.46 + Math.sin(sos.bob) * 16;
+
+            const distY = Math.abs(p.y - sos.y);
+            if (sos.x - p.x < Math.max(210, W * 0.45) && distY < 130 && !game.parachute) {
+              game.parachute = { x: p.x + 15, y: p.y + 10 };
+              AudioEngine.playRescue();
+              showToast('🪂 Paket bantuan parasut meluncur ke pesawat SOS!', 2.8);
+            }
+          } else {
+            sos.x += 240 * dt;
+            sos.y -= 35 * dt;
+          }
+        }
+
+        if (game.parachute && game.sosPlane) {
+          const para = game.parachute;
+          para.x += (game.sosPlane.x - para.x) * dt * 4.5;
+          para.y += (game.sosPlane.y - para.y) * dt * 4.5;
+          if (Math.hypot(para.x - game.sosPlane.x, para.y - game.sosPlane.y) < 28) {
+            game.sosPlane.rescued = true;
+            game.sosRescued = true;
+            game.parachute = null;
+            game.stars += 5;
+            spawnBurstParticles(game.sosPlane.x, game.sosPlane.y, '#4ade80', 18);
+            showToast('❤️ Pesawat SOS selamat! Ayo mendarat di bandara!', 3.2);
+          }
+        }
+
+        // Update Rintangan & Deteksi Bahaya / Tabrakan
+        for (let i = game.obstacles.length - 1; i >= 0; i--) {
+          const o = game.obstacles[i];
+          o.x -= o.speed * sp.mult * dt;
+
+          if (o.type === 'balloon') {
+            o.bobOffset += dt * 2.5;
+            o.y += Math.sin(o.bobOffset) * 28 * dt;
+          }
+          if (o.type === 'whirlwind' || o.type === 'turbulence') {
+            o.spin += dt * 7.5;
+          }
+          if (o.type === 'stormCloud') {
+            o.lightningTimer = (o.lightningTimer || 0) + dt;
+          }
+
+          // Peringatan Alarm Kokpit saat awan petir atau zona turbulensi mendekat sejajar pesawat
+          if (!o.warned && o.x > p.x && o.x - p.x < 250 && Math.abs(o.y - p.y) < 88) {
+            o.warned = true;
+            if (o.type === 'stormCloud') {
+              triggerAlarm('⚠️ AWAS PETIR DI DEPAN!', 'beep', 1.15);
+              AudioEngine.playThunder(0.65);
+            } else if (o.type === 'turbulence') {
+              triggerAlarm('⚠️ TURBULENSI! HINDARI PUSARAN!', 'whoop', 1.25);
+            }
+          }
+
+          // Cek Tabrakan (hitbox ramah anak 0.76x)
+          const dist = Math.hypot(p.x - o.x, p.y - o.y);
+          if (dist < (p.radius + o.radius) * 0.76) {
+            if (o.type === 'whirlwind') {
+              p.targetY = Math.max(minY, Math.min(maxY, p.targetY + o.pushDir * 80));
+              game.turbulenceBoost = 1.0;
+              game.shakeTime = 0.35;
+              game.shakeStrength = 5;
+              AudioEngine.playWindPush();
+              spawnBurstParticles(o.x, o.y, '#7dd3fc', 10);
+              showToast('💨 Wuuush! Angin kencang mendorong pesawat!', 2.0);
+              game.obstacles.splice(i, 1);
+              continue;
+            } else if (o.type === 'turbulence') {
+              // Zona Turbulensi Misi 4: mengguncang layar/pesawat + alarm turbulensi + kurangi hati jika tidak kebal
+              p.targetY = Math.max(minY, Math.min(maxY, p.targetY + o.pushDir * 85));
+              game.turbulenceBoost = 1.2;
+              game.shakeTime = 0.65;
+              game.shakeStrength = 9;
+              triggerAlarm('⚠️ TURBULENSI KUAT!', 'whoop', 1.5);
+              AudioEngine.playWindPush();
+              spawnBurstParticles(o.x, o.y, '#cbd5e1', 14);
+
+              if (p.invuln <= 0) {
+                game.hearts = Math.max(0, game.hearts - 1);
+                p.invuln = 2.1;
+                AudioEngine.playHit();
+                if (game.hearts <= 0) {
+                  updateHUD();
+                  triggerRest();
+                  return;
+                }
+              }
+              game.obstacles.splice(i, 1);
+              continue;
+            } else if (p.invuln <= 0) {
+              game.hearts = Math.max(0, game.hearts - 1);
+              p.invuln = 2.1;
+              game.shakeTime = 0.4;
+              game.shakeStrength = 7;
+              AudioEngine.playHit();
+              if (o.type === 'stormCloud') AudioEngine.playThunder(0.9);
+              spawnBurstParticles(p.x, p.y, '#facc15', 14);
+              showToast('⚡ Ups! Hati-hati awan badai ya, Kapten!', 2.0);
+              game.obstacles.splice(i, 1);
+
+              if (game.hearts <= 0) {
+                updateHUD();
+                triggerRest();
+                return;
+              }
+              continue;
+            }
+          }
+
+          if (o.x < -130) game.obstacles.splice(i, 1);
+        }
+
+        // Update Bintang & Kotak P3K
+        for (let i = game.collectibles.length - 1; i >= 0; i--) {
+          const c = game.collectibles[i];
+          c.x -= c.speed * sp.mult * dt;
+          c.bob += dt * 4;
+          const cy = c.y + Math.sin(c.bob) * 8;
+
+          const dist = Math.hypot(p.x - c.x, p.y - cy);
+          if (dist < p.radius + c.radius + 9) {
+            if (c.type === 'star') {
+              game.stars += 1;
+              AudioEngine.playStar();
+              spawnBurstParticles(c.x, cy, '#fde047', 10);
+            } else {
+              if (game.hearts < game.maxHearts) {
+                game.hearts += 1;
+                showToast('🧰 Hore! Pesawat diperbaiki (+1 Hati)!', 2.2);
+              } else {
+                game.stars += 3;
+              }
+              AudioEngine.playHeal();
+              spawnBurstParticles(c.x, cy, '#4ade80', 12);
+            }
+            game.collectibles.splice(i, 1);
+            continue;
+          }
+
+          if (c.x < -80) game.collectibles.splice(i, 1);
+        }
+
+        // Masuk Fase Pendekatan Landasan Darurat (Misi 4) pada 80%
+        if (game.mission.isEmergencyLanding && game.progress >= 0.80) {
+          game.obstacles = [];
+          game.state = 'APPROACH';
+          game.airport = { x: W + 90, emergency: true };
+          updateSpeedUI();
+          showToast('🛬 Landasan Darurat terlihat! Tekan 🐢 Pelan & ikuti lampu hijau!', 4.5);
+          updateHUD();
+          return;
+        }
+
+        // Masuk Fase Mendarat di Bandara (Misi 1, 2, 3) pada 100%
+        if (!game.mission.isEmergencyLanding && game.progress >= 1) {
+          if (game.sosPlane && !game.sosPlane.rescued) {
+            game.sosPlane.rescued = true;
+            game.sosRescued = true;
+          }
+          game.obstacles = [];
+          game.state = 'LANDING';
+          game.airport = { x: W + 80, emergency: false };
+          showToast('🏁 Bandara terlihat! Bersiap mendarat mulus...', 3.0);
+        }
+
+        updateHUD();
+      }
+
+      // =======================================================================
+      // 9. RENDER VISUAL 2D CANVAS (SEMUA ARC PAKAI safeArc!)
+      // =======================================================================
+      function drawSky() {
+        const theme = (game.state === 'MENU' || game.state === 'BRIEFING')
+          ? 'sunny'
+          : game.mission.theme;
+
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        if (theme === 'sunny') {
+          grad.addColorStop(0, '#38bdf8');
+          grad.addColorStop(0.65, '#bae6fd');
+          grad.addColorStop(1, '#fef9c3');
+        } else if (theme === 'storm') {
+          grad.addColorStop(0, '#334155');
+          grad.addColorStop(0.6, '#64748b');
+          grad.addColorStop(1, '#94a3b8');
+        } else if (theme === 'fog') {
+          grad.addColorStop(0, '#94a3b8');
+          grad.addColorStop(0.55, '#cbd5e1');
+          grad.addColorStop(1, '#f1f5f9');
+        } else if (theme === 'wind') {
+          grad.addColorStop(0, '#7c3aed');
+          grad.addColorStop(0.45, '#f97316');
+          grad.addColorStop(1, '#fde047');
+        } else {
+          // emergency: langit badai gelap dramatis tapi tetap jelas untuk anak
+          grad.addColorStop(0, '#1e293b');
+          grad.addColorStop(0.55, '#334155');
+          grad.addColorStop(1, '#475569');
+        }
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Kilatan petir langit
+        if (game.skyLightningAlpha > 0.02) {
+          ctx.save();
+          ctx.fillStyle = `rgba(254, 249, 195, ${game.skyLightningAlpha * 0.48})`;
+          ctx.fillRect(0, 0, W, H);
+          ctx.restore();
+        }
+
+        // Matahari & Pelangi saat cerah (Menu / Briefing)
+        if (theme === 'sunny') {
+          const rx = W * 0.72;
+          const ry = H * 0.78;
+          const rainbowColors = ['#f87171', '#fb923c', '#facc15', '#4ade80', '#60a5fa', '#c084fc'];
+          ctx.save();
+          ctx.globalAlpha = 0.28;
+          rainbowColors.forEach((col, i) => {
+            const radius = Math.min(W, H) * 0.55 - i * 10;
+            if (radius <= 2) return;
+            ctx.beginPath();
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 10;
+            safeArc(rx, ry, radius, Math.PI, Math.PI * 2);
+            ctx.stroke();
+          });
+          ctx.restore();
+
+          // Matahari ceria
+          ctx.save();
+          ctx.fillStyle = '#fde047';
+          ctx.beginPath();
+          safeArc(W - 85, 85, 42, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(253, 224, 71, 0.35)';
+          ctx.beginPath();
+          safeArc(W - 85, 85, 56 + Math.sin(game.time * 3) * 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function drawSoftCloud(x, y, scale, color = 'rgba(255,255,255,0.85)') {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        safeArc(0, 0, 26, 0, Math.PI * 2);
+        safeArc(24, -8, 30, 0, Math.PI * 2);
+        safeArc(52, 0, 24, 0, Math.PI * 2);
+        safeArc(26, 12, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawHills() {
+        const theme = (game.state === 'MENU' || game.state === 'BRIEFING') ? 'sunny' : game.mission.theme;
+        const backCol = (theme === 'storm' || theme === 'emergency') ? '#334155' : (theme === 'wind' ? '#7e22ce' : '#4ade80');
+        const frontCol = (theme === 'storm' || theme === 'emergency') ? '#1e293b' : (theme === 'wind' ? '#581c87' : '#22c55e');
+
+        ctx.fillStyle = backCol;
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        for (let x = -320; x <= W + 320; x += 160) {
+          const hx = x - (game.hillsOffset * 0.5);
+          ctx.quadraticCurveTo(hx + 80, H - 105, hx + 160, H - 45);
+        }
+        ctx.lineTo(W, H);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = frontCol;
+        ctx.beginPath();
+        ctx.moveTo(0, H);
+        for (let x = -320; x <= W + 320; x += 160) {
+          const hx = x - game.hillsOffset;
+          ctx.quadraticCurveTo(hx + 80, H - 72, hx + 160, H - 22);
+        }
+        ctx.lineTo(W, H);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawAirport() {
+        if (!game.airport) return;
+        const ax = game.airport.x;
+        const groundY = H - 55;
+        const isEmergency = game.airport.emergency;
+
+        ctx.save();
+
+        // Jalur Pemandu Hijau (Glide Path) untuk Misi 4 Pendaratan Darurat
+        if (isEmergency && (game.state === 'APPROACH' || game.state === 'LANDING')) {
+          const pulse = 0.5 + 0.5 * Math.sin(game.time * 7);
+          const runwayEntryX = ax + 30;
+          const runwayEntryY = groundY - 22;
+
+          // Koridor cahaya hijau lembut
+          const pathGrad = ctx.createLinearGradient(0, H * 0.35, runwayEntryX, runwayEntryY);
+          pathGrad.addColorStop(0, 'rgba(74, 222, 128, 0.04)');
+          pathGrad.addColorStop(1, `rgba(74, 222, 128, ${0.22 + pulse * 0.16})`);
+          ctx.fillStyle = pathGrad;
+          ctx.beginPath();
+          ctx.moveTo(0, H * 0.25);
+          ctx.lineTo(runwayEntryX, runwayEntryY - 38);
+          ctx.lineTo(runwayEntryX, runwayEntryY + 26);
+          ctx.lineTo(0, H * 0.62);
+          ctx.closePath();
+          ctx.fill();
+
+          // Deretan lampu pemandu hijau berkedip menuju landasan
+          for (let i = 0; i < 6; i++) {
+            const t = i / 5;
+            const gx = game.player.x + 55 + (runwayEntryX - (game.player.x + 55)) * t;
+            const gy = (H * 0.44) + (runwayEntryY - H * 0.44) * t;
+            const activeLamp = Math.floor(game.time * 6) % 6 === i;
+            ctx.fillStyle = activeLamp ? '#86efac' : '#22c55e';
+            ctx.beginPath();
+            safeArc(gx, gy, activeLamp ? 10 : 6, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Panah visual turun ke landasan
+          ctx.fillStyle = '#fde047';
+          ctx.font = 'bold 16px Fredoka, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(
+            game.speedIndex === 0 ? '✅ IKUTI LAMPU HIJAU ↘️' : '🐢 TEKAN PELAN DULU!',
+            Math.max(160, Math.min(W - 140, runwayEntryX - 70)),
+            runwayEntryY - 58
+          );
+        }
+
+        // Landasan aspal
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(ax - 60, groundY, W + 120, 55);
+
+        // Garis putih landasan
+        ctx.fillStyle = '#f8fafc';
+        for (let x = ax - 20; x < ax + W; x += 55) {
+          ctx.fillRect(x, groundY + 22, 30, 7);
+        }
+
+        // Lampu tepi landasan menyala terang pada Landasan Darurat
+        if (isEmergency) {
+          const blink = Math.floor(game.time * 6) % 2 === 0;
+          for (let x = ax - 40; x < ax + W; x += 48) {
+            ctx.fillStyle = blink ? '#4ade80' : '#facc15';
+            ctx.beginPath();
+            safeArc(x, groundY + 4, 5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Menara Kontrol
+        const tx = ax + 215;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.fillRect(tx, groundY - 95, 36, 95);
+        ctx.fillStyle = isEmergency ? '#22c55e' : '#0284c7';
+        ctx.fillRect(tx - 12, groundY - 120, 60, 28);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(tx - 16, groundY - 130, 68, 12);
+
+        // Papan Nama Bandara / Landasan Darurat
+        ctx.fillStyle = isEmergency ? '#4ade80' : '#facc15';
+        ctx.beginPath();
+        ctx.roundRect(tx - 62, groundY - 164, 160, 28, 11);
+        ctx.fill();
+        ctx.fillStyle = isEmergency ? '#14532d' : '#713f12';
+        ctx.font = 'bold 14px Fredoka, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(isEmergency ? '🛬 LANDASAN DARURAT' : '🏁 BANDARA', tx + 18, groundY - 145);
+
+        ctx.restore();
+      }
+
+      function drawPlayerPlane() {
+        const p = game.player;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+
+        if (p.invuln > 0 && Math.floor(game.time * 14) % 2 === 0) {
+          ctx.globalAlpha = 0.48;
+        }
+
+        // Ekor pesawat
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(-26, -2);
+        ctx.lineTo(-42, -22);
+        ctx.lineTo(-22, -22);
+        ctx.lineTo(-10, -2);
+        ctx.closePath();
+        ctx.fill();
+
+        // Sayap belakang
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.ellipse(-4, -14, 16, 7, -0.15, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Badan pesawat kartun merah cerah
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 34, 17, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Garis kuning
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(-24, 1, 46, 5);
+
+        // Lambang penyelamat
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        safeArc(-14, 0, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-16, -4, 4, 8);
+        ctx.fillRect(-18, -2, 8, 4);
+
+        // Kokpit & Pilot cilik
+        ctx.fillStyle = '#bae6fd';
+        ctx.beginPath();
+        safeArc(10, -7, 11, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fed7aa';
+        ctx.beginPath();
+        safeArc(10, -9, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sayap depan
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.ellipse(2, 10, 18, 7, 0.12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hidung baling-baling
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        safeArc(34, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Baling-baling berputar
+        const propH = 18 + Math.sin(p.propAngle) * 10;
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(37, -propH);
+        ctx.lineTo(37, propH);
+        ctx.stroke();
+
+        // Api turbo lucu saat mode Cepat!
+        if (game.speedIndex === 2 && (game.state === 'PLAYING' || game.state === 'APPROACH')) {
+          ctx.fillStyle = '#fb923c';
+          ctx.beginPath();
+          ctx.moveTo(-34, -5);
+          ctx.lineTo(-48 - Math.random() * 10, 0);
+          ctx.lineTo(-34, 5);
+          ctx.closePath();
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function drawSOSPlane() {
+        if (!game.sosPlane) return;
+        const s = game.sosPlane;
+
+        ctx.save();
+        ctx.translate(s.x, s.y);
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 26, 13, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.ellipse(2, 8, 13, 5, 0.1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.moveTo(-20, -2);
+        ctx.lineTo(-32, -16);
+        ctx.lineTo(-16, -16);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = s.rescued ? '#dcfce7' : '#fee2e2';
+        ctx.strokeStyle = s.rescued ? '#22c55e' : '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(-42, -52, 84, 28, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = s.rescued ? '#15803d' : '#b91c1c';
+        ctx.font = 'bold 14px Fredoka, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(s.rescued ? 'Makasih! ❤️' : '🆘 SOS!', 0, -33);
+
+        ctx.restore();
+      }
+
+      function drawParachute() {
+        if (!game.parachute) return;
+        const pa = game.parachute;
+        ctx.save();
+        ctx.translate(pa.x, pa.y);
+
+        ctx.fillStyle = '#fb923c';
+        ctx.beginPath();
+        safeArc(0, -14, 18, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-14, -14);
+        ctx.lineTo(-4, 4);
+        ctx.moveTo(14, -14);
+        ctx.lineTo(4, 4);
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-8, 4, 16, 14);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(-2, 6, 4, 10);
+        ctx.fillRect(-5, 9, 10, 4);
+
+        ctx.restore();
+      }
+
+      function drawObstacles() {
+        game.obstacles.forEach(o => {
+          ctx.save();
+          ctx.translate(o.x, o.y);
+
+          if (o.type === 'stormCloud') {
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            safeArc(-18, 2, 22, 0, Math.PI * 2);
+            safeArc(4, -10, 26, 0, Math.PI * 2);
+            safeArc(24, 2, 20, 0, Math.PI * 2);
+            safeArc(4, 12, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (Math.sin((o.lightningTimer || 0) * 6.5) > -0.25) {
+              ctx.fillStyle = '#fde047';
+              ctx.beginPath();
+              ctx.moveTo(2, 12);
+              ctx.lineTo(-8, 30);
+              ctx.lineTo(2, 30);
+              ctx.lineTo(-4, 48);
+              ctx.lineTo(14, 24);
+              ctx.lineTo(4, 24);
+              ctx.closePath();
+              ctx.fill();
+            }
+          } else if (o.type === 'balloon') {
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath();
+            safeArc(0, -6, 24, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.ellipse(0, -6, 10, 24, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#92400e';
+            ctx.fillRect(-8, 22, 16, 12);
+          } else if (o.type === 'whirlwind') {
+            ctx.rotate(o.spin);
+            ctx.strokeStyle = 'rgba(224, 242, 254, 0.92)';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            for (let r = 8; r <= 30; r += 8) {
+              ctx.beginPath();
+              safeArc(0, 0, r, 0, Math.PI * 1.35);
+              ctx.stroke();
+            }
+          } else if (o.type === 'turbulence') {
+            // Zona Turbulensi visual: pusaran angin ungu-oranye berkedip + awan pusaran
+            ctx.fillStyle = 'rgba(251, 146, 60, 0.18)';
+            ctx.beginPath();
+            safeArc(0, 0, 42, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.rotate(o.spin);
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            for (let r = 10; r <= 36; r += 9) {
+              ctx.beginPath();
+              safeArc(0, 0, r, 0, Math.PI * 1.35);
+              ctx.stroke();
+            }
+          }
+
+          ctx.restore();
+        });
+      }
+
+      function drawCollectibles() {
+        game.collectibles.forEach(c => {
+          const cy = c.y + Math.sin(c.bob) * 8;
+          ctx.save();
+          ctx.translate(c.x, cy);
+
+          if (c.type === 'star') {
+            ctx.fillStyle = '#facc15';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+              const a = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+              const x = Math.cos(a) * 18;
+              const y = Math.sin(a) * 18;
+              if (i === 0) ctx.moveTo(x, y);
+              else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          } else {
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(-16, -14, 32, 28, 8);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(-4, -9, 8, 18);
+            ctx.fillRect(-9, -4, 18, 8);
+          }
+
+          ctx.restore();
+        });
+      }
+
+      function drawWeatherOverlay() {
+        const isFlying = (game.state === 'PLAYING' || game.state === 'APPROACH' || game.state === 'LANDING');
+        if (!isFlying) return;
+        const theme = game.mission.theme;
+
+        if (theme === 'storm' || theme === 'emergency') {
+          ctx.strokeStyle = theme === 'emergency' ? 'rgba(224, 242, 254, 0.58)' : 'rgba(224, 242, 254, 0.48)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          game.rainDrops.forEach(r => {
+            ctx.moveTo(r.x, r.y);
+            ctx.lineTo(r.x - r.len * 0.35, r.y + r.len);
+          });
+          ctx.stroke();
+        }
+
+        if (theme === 'wind' || theme === 'emergency') {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.36)';
+          ctx.lineWidth = 3;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          game.windLines.forEach(w => {
+            ctx.moveTo(w.x, w.y);
+            ctx.lineTo(w.x + w.len, w.y);
+          });
+          ctx.stroke();
+        }
+
+        if (theme === 'fog') {
+          const p = game.player;
+          const fogAlpha = game.radarTimer > 0 ? 0.24 : 0.78;
+          const fogGrad = ctx.createLinearGradient(p.x + 20, 0, W * 0.85, 0);
+          fogGrad.addColorStop(0, 'rgba(241, 245, 249, 0.05)');
+          fogGrad.addColorStop(0.45, `rgba(241, 245, 249, ${fogAlpha * 0.85})`);
+          fogGrad.addColorStop(1, `rgba(226, 232, 240, ${fogAlpha})`);
+          ctx.fillStyle = fogGrad;
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        // Sorotan Lampu Radar
+        if (game.radarTimer > 0) {
+          const p = game.player;
+          ctx.save();
+          ctx.translate(p.x + 34, p.y);
+          ctx.rotate(p.angle);
+          const beamLen = Math.max(380, W * 0.65);
+          const beamGrad = ctx.createLinearGradient(0, 0, beamLen, 0);
+          beamGrad.addColorStop(0, 'rgba(254, 240, 138, 0.56)');
+          beamGrad.addColorStop(0.6, 'rgba(254, 240, 138, 0.22)');
+          beamGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
+          ctx.fillStyle = beamGrad;
+          ctx.beginPath();
+          ctx.moveTo(0, -6);
+          ctx.lineTo(beamLen, -145);
+          ctx.lineTo(beamLen, 145);
+          ctx.lineTo(0, 6);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function drawParticlesAndConfetti() {
+        game.particles.forEach(pt => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, pt.life / pt.maxLife);
+          ctx.fillStyle = pt.color;
+          ctx.beginPath();
+          safeArc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        game.confetti.forEach(c => {
+          ctx.save();
+          ctx.translate(c.x, c.y);
+          ctx.rotate(c.rot);
+          ctx.fillStyle = c.color;
+          ctx.fillRect(-c.size / 2, -c.size / 3, c.size, c.size * 0.66);
+          ctx.restore();
+        });
+      }
+
+      function render() {
+        // Pengaman wajib jika ukuran iframe/kanvas belum siap
+        if (W <= 0 || H <= 0) return;
+
+        ctx.save();
+        // Efek guncangan layar saat turbulensi / petir dekat
+        if (game.shakeTime > 0) {
+          const sx = (Math.random() - 0.5) * game.shakeStrength * 2;
+          const sy = (Math.random() - 0.5) * game.shakeStrength * 2;
+          ctx.translate(sx, sy);
+        }
+
+        drawSky();
+
+        const isStormy = (game.state !== 'MENU' && game.state !== 'BRIEFING')
+          && (game.mission.theme === 'storm' || game.mission.theme === 'emergency');
+        const cloudColor = isStormy ? 'rgba(148, 163, 184, 0.5)' : 'rgba(255, 255, 255, 0.82)';
+        game.bgClouds.forEach(c => drawSoftCloud(c.x, c.y, c.scale, cloudColor));
+
+        drawHills();
+        drawAirport();
+
+        if (game.state === 'PLAYING' || game.state === 'APPROACH' || game.state === 'LANDING') {
+          drawCollectibles();
+          drawObstacles();
+          drawSOSPlane();
+          drawParachute();
+        }
+
+        drawPlayerPlane();
+        drawWeatherOverlay();
+        drawParticlesAndConfetti();
+        ctx.restore();
+      }
+
+      // =======================================================================
+      // 10. EVENT LISTENER INPUT (SENTUH, MOUSE, KEYBOARD AMAN GOOGLE SITES)
+      // =======================================================================
+      function setTargetFromClientY(clientY) {
+        if (game.state !== 'PLAYING' && game.state !== 'APPROACH') return;
+        const rect = canvas.getBoundingClientRect();
+        game.player.targetY = clientY - rect.top;
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        AudioEngine.init();
+        game.pointerActive = true;
+        setTargetFromClientY(e.clientY);
+      });
+
+      canvas.addEventListener('pointermove', (e) => {
+        if (e.pointerType === 'mouse' || game.pointerActive) {
+          setTargetFromClientY(e.clientY);
+        }
+      });
+
+      window.addEventListener('pointerup', () => {
+        game.pointerActive = false;
+      });
+
+      // Keyboard: Panah/WASD + Spasi Radar, cegah scroll Google Sites
+      window.addEventListener('keydown', (e) => {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', ' '].includes(e.key)) {
+          e.preventDefault();
+        }
+        AudioEngine.init();
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') game.keys.up = true;
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') game.keys.down = true;
+
+        if (game.state === 'PLAYING' || game.state === 'APPROACH') {
+          if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+            setSpeed(game.speedIndex - 1);
+          }
+          if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+            setSpeed(game.speedIndex + 1);
+          }
+          if (e.key === ' ') {
+            activateRadar();
+          }
+        }
+      }, { passive: false });
+
+      window.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') game.keys.up = false;
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') game.keys.down = false;
+      });
+
+      // Tombol Kecepatan Pesawat (Pelan / Normal / Cepat)
+      ui.speedButtons.forEach((btn, idx) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setSpeed(idx);
+        });
+      });
+
+      // Pilihan Kartu 4 Misi di Menu Awal
+      const missionCards = document.querySelectorAll('.mission-card');
+      missionCards.forEach((card) => {
+        card.addEventListener('click', () => {
+          AudioEngine.init();
+          AudioEngine.playClick();
+          missionCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          game.selectedMission = parseInt(card.dataset.mission, 10);
+        });
+      });
+
+      // Tombol-tombol Navigasi UI
+      document.getElementById('btn-start-menu').addEventListener('click', () => {
+        openBriefing(game.selectedMission);
+      });
+      document.getElementById('btn-brief-back').addEventListener('click', goToMenu);
+      document.getElementById('btn-brief-fly').addEventListener('click', startMission);
+
+      document.getElementById('btn-radar').addEventListener('click', (e) => {
+        e.stopPropagation();
+        activateRadar();
+      });
+
+      document.getElementById('btn-home-hud').addEventListener('click', goToMenu);
+      document.getElementById('btn-mute-hud').addEventListener('click', () => AudioEngine.toggleMute());
+      document.getElementById('btn-mute-menu').addEventListener('click', () => AudioEngine.toggleMute());
+
+      document.getElementById('btn-win-menu').addEventListener('click', goToMenu);
+      document.getElementById('btn-win-next').addEventListener('click', () => {
+        const nextIdx = (game.selectedMission + 1) % MISSIONS.length;
+        missionCards.forEach((c, idx) => c.classList.toggle('selected', idx === nextIdx));
+        openBriefing(nextIdx);
+      });
+
+      document.getElementById('btn-rest-menu').addEventListener('click', goToMenu);
+      document.getElementById('btn-rest-retry').addEventListener('click', startMission);
+
+      // =======================================================================
+      // 11. GAME LOOP UTAMA
+      // =======================================================================
+      let lastTime = 0;
+
+      function gameLoop(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+        lastTime = timestamp;
+
+        update(dt);
+        render();
+        requestAnimationFrame(gameLoop);
+      }
+
+      window.addEventListener('resize', resizeCanvas);
+
+      window.onload = function () {
+        resizeCanvas();
+        initAmbientBackground();
+        requestAnimationFrame(gameLoop);
+      };
+    })();
+  </script>
+</body>
+</html>
