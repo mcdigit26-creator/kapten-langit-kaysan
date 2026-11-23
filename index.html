@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Kapten Langit: Misi Penyelamatan</title>
+  <!-- PWA Manifest & Pengaturan Layar Penuh Native HP -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#38bdf8">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kapten Langit">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
   <!-- Font ramah anak dengan fallback aman jika offline -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -896,6 +905,7 @@
     <div id="screen-menu" class="overlay">
       <div class="card">
         <div class="card-top-bar">
+          <button class="btn-sound-pill hidden" id="btn-install-pwa" style="background:#dcfce7; border-color:#4ade80; color:#14532d;" aria-label="Pasang di HP">📲 Pasang di HP</button>
           <button class="btn-sound-pill" id="btn-mute-menu" aria-label="Toggle Suara">🔊<span class="label-text"> Suara</span></button>
           <button class="btn-icon" id="btn-fs-menu" title="Layar Penuh" aria-label="Layar Penuh">⛶</button>
         </div>
@@ -3096,6 +3106,39 @@
         initAmbientBackground();
         requestAnimationFrame(gameLoop);
       };
+      // =======================================================================
+      // 12. REGISTRASI PWA (SERVICE WORKER & TOMBOL PASANG DI HP)
+      // =======================================================================
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js').catch(() => {});
+        });
+      }
+
+      let deferredInstallPrompt = null;
+      const btnInstallPwa = document.getElementById('btn-install-pwa');
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        if (btnInstallPwa) btnInstallPwa.classList.remove('hidden');
+      });
+
+      if (btnInstallPwa) {
+        btnInstallPwa.addEventListener('click', async () => {
+          AudioEngine.init();
+          AudioEngine.playClick();
+          if (!deferredInstallPrompt) return;
+          deferredInstallPrompt.prompt();
+          await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          btnInstallPwa.classList.add('hidden');
+        });
+      }
+
+      window.addEventListener('appinstalled', () => {
+        if (btnInstallPwa) btnInstallPwa.classList.add('hidden');
+      });
     })();
   </script>
 </body>
