@@ -25,9 +25,17 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: rgba(2, 132, 199, 0.22);
+    }
+
+    html, body, #game-wrapper, .overlay, .card {
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
+    }
+
+    .overlay, .card, button, .plane-card, .mission-card, .sens-btn, .quiz-btn {
+      touch-action: manipulation;
     }
 
     html, body {
@@ -96,6 +104,7 @@
       touch-action: pan-y;
       padding-right: 2px;
       flex: 1 1 auto;
+      min-height: 0;
     }
 
     @keyframes popIn {
@@ -1177,7 +1186,7 @@
         </div>
 
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v8</span></p>
+        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v9</span></p>
 
         <div class="card-scroll-body">
           <!-- 1. Pilih Jenis Pesawat -->
@@ -1406,7 +1415,7 @@
   <script>
     /**
      * =========================================================================
-     * KAPTEN LANGIT: MISI PENYELAMATAN (v8)
+     * KAPTEN LANGIT: MISI PENYELAMATAN (v9)
      * - Analog Virtual 2-Sumbu (Naik/Turun + Kecepatan)
      * - Tombol Tembak & Rudal (Pesawat Militer), Tali (Helikopter), Siram Air
      * - 6 Jenis Pesawat & 7 Misi Edukasi Anak Usia 5-8 Tahun
@@ -1690,10 +1699,10 @@
             const bFreq = bassNotes[step];
 
             if (mFreq > 0) {
-              this.playTone(mFreq, 'triangle', 0.19, 0.032 * duck, null, 0);
+              this.playTone(mFreq, 'triangle', 0.21, 0.095 * duck, null, 0);
             }
             if (bFreq > 0) {
-              this.playTone(bFreq, 'sine', 0.22, 0.038 * duck, null, 0);
+              this.playTone(bFreq, 'triangle', 0.23, 0.085 * duck, null, 0);
             }
             // Ketukan ritmis ringan di ketukan ganjil (off-beat shaker)
             if (step % 2 === 1 && this.noiseBuffer) {
@@ -1706,7 +1715,7 @@
                 flt.frequency.value = 4200;
                 const g = this.ctx.createGain();
                 g.gain.setValueAtTime(0.0005, now);
-                g.gain.linearRampToValueAtTime(0.011 * duck, now + 0.008);
+                g.gain.linearRampToValueAtTime(0.028 * duck, now + 0.008);
                 g.gain.exponentialRampToValueAtTime(0.0005, now + 0.055);
                 src.connect(flt);
                 flt.connect(g);
@@ -2132,7 +2141,7 @@
           txt = txt.replace(/\((\d+)\/(\d+)\)/g, ', $1 dari $2.');
           txt = txt.replace(/\+1\s*Hati/gi, 'tambah satu hati');
           txt = txt.replace(/100%/g, 'seratus persen');
-          txt = txt.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}➔▲▼•]/gu, ' ');
+          txt = txt.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF\uFE00-\uFE0F➔▲▼•]/g, ' ');
           txt = txt.replace(/\s+/g, ' ').trim();
           return txt;
         },
@@ -5248,7 +5257,7 @@
         const msg = (err && (err.message || String(err))) || 'Unknown error';
         if (msg !== lastErrorShown) {
           lastErrorShown = msg;
-          debugErrorEl.textContent = 'Info Teknis v8: ' + msg;
+          debugErrorEl.textContent = 'Info Teknis v9: ' + msg;
           debugErrorEl.style.display = 'block';
         }
       }
@@ -5278,6 +5287,12 @@
         const ro = new ResizeObserver(() => resizeCanvas(false));
         ro.observe(wrapper);
       }
+
+      function unlockAudioOnAnyGesture() {
+        AudioEngine.init();
+      }
+      document.addEventListener('pointerdown', unlockAudioOnAnyGesture, { passive: true });
+      document.addEventListener('touchstart', unlockAudioOnAnyGesture, { passive: true });
 
       window.onload = function () {
         Narrator.init();
