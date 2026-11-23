@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kapten-langit-v3';
+const CACHE_NAME = 'kapten-langit-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -26,7 +26,7 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request)
+    fetch(e.request, { cache: 'no-store' })
       .then((res) => {
         if (res && res.status === 200 && res.type === 'basic') {
           const clone = res.clone();

@@ -130,7 +130,7 @@
       font-family: inherit;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
       outline: none;
       -webkit-tap-highlight-color: transparent;
       white-space: nowrap;
@@ -443,8 +443,8 @@
     }
 
     @keyframes alarmPulse {
-      0% { transform: scale(0.98); filter: brightness(1); }
-      100% { transform: scale(1.04); filter: brightness(1.18); }
+      0% { transform: scale(0.98); opacity: 0.92; }
+      100% { transform: scale(1.04); opacity: 1; }
     }
 
     /* Pesan Edukasi Singkat Mengambang */
@@ -557,8 +557,7 @@
     }
 
     #btn-radar.cooldown {
-      opacity: 0.74;
-      filter: grayscale(0.35);
+      opacity: 0.65;
       cursor: not-allowed;
     }
 
@@ -910,7 +909,7 @@
           <button class="btn-icon" id="btn-fs-menu" title="Layar Penuh" aria-label="Layar Penuh">⛶</button>
         </div>
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Misi Penyelamatan Pesawat • Untuk Usia 5–8 Tahun</p>
+        <p class="game-subtitle">Misi Penyelamatan Pesawat • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v4</span></p>
 
         <div class="mission-grid" id="mission-grid">
           <div class="mission-card selected" data-mission="0" role="button" tabindex="0">
@@ -1019,6 +1018,8 @@
         </div>
       </div>
     </div>
+    <!-- Diagnostik Error (hanya muncul jika ada error JS di perangkat) -->
+    <div id="debug-error" style="display:none; position:fixed; bottom:6px; left:6px; right:6px; z-index:99; background:rgba(185,28,28,0.92); color:#fff; font-size:11px; padding:6px 10px; border-radius:10px; word-break:break-word; pointer-events:none;"></div>
   </div>
 
   <script>
@@ -1530,16 +1531,26 @@
         layout.runwayY = H - layout.groundHeight - Math.round(18 * layout.scale);
       }
 
-      function resizeCanvas() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      function resizeCanvas(force = false) {
         const rect = wrapper.getBoundingClientRect();
         const nextW = Math.round(rect.width || window.innerWidth || 0);
         const nextH = Math.round(rect.height || window.innerHeight || 0);
         if (nextW <= 0 || nextH <= 0) return;
 
+        // Abaikan perubahan mikro 1-2px di Safari iOS agar kanvas tidak ter-reset saat terbang
+        if (!force && W > 0 && H > 0 && Math.abs(nextW - W) <= 2 && Math.abs(nextH - H) <= 2) {
+          return;
+        }
+
         // Simpan posisi vertikal relatif pesawat sebelum layar berubah (mis. saat HP diputar)
         const prevRelY = (H > 0 && game.player) ? (game.player.y / H) : 0.46;
 
-        const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
+        // Batasi DPR ke 1.5 di iOS agar memori GPU iPhone 7 (2GB RAM) tetap aman & stabil
+        const maxDpr = isIOS ? 1.5 : 2;
+        const nextDpr = Math.min(window.devicePixelRatio || 1, maxDpr);
         const targetPixelW = Math.floor(nextW * nextDpr);
         const targetPixelH = Math.floor(nextH * nextDpr);
 
@@ -1748,7 +1759,7 @@
         AudioEngine.init();
         AudioEngine.playClick();
         clearAlarm();
-        resizeCanvas();
+        resizeCanvas(true);
 
         const m = game.mission;
         game.state = 'PLAYING';
@@ -2974,34 +2985,40 @@
       function render() {
         if (W <= 0 || H <= 0) return;
 
+        // Pastikan transform & transparansi selalu bersih di setiap frame
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.globalAlpha = 1;
         ctx.save();
-        if (game.shakeTime > 0) {
-          const sx = (Math.random() - 0.5) * game.shakeStrength * 2;
-          const sy = (Math.random() - 0.5) * game.shakeStrength * 2;
-          ctx.translate(sx, sy);
+        try {
+          if (game.shakeTime > 0) {
+            const sx = (Math.random() - 0.5) * game.shakeStrength * 2;
+            const sy = (Math.random() - 0.5) * game.shakeStrength * 2;
+            ctx.translate(sx, sy);
+          }
+
+          drawSky();
+
+          const isStormy = (game.state !== 'MENU' && game.state !== 'BRIEFING')
+            && (game.mission.theme === 'storm' || game.mission.theme === 'emergency');
+          const cloudColor = isStormy ? 'rgba(148, 163, 184, 0.5)' : 'rgba(255, 255, 255, 0.82)';
+          game.bgClouds.forEach(c => drawSoftCloud(c.x, c.y, c.scale, cloudColor));
+
+          drawHills();
+          drawAirport();
+
+          if (game.state === 'PLAYING' || game.state === 'APPROACH' || game.state === 'LANDING') {
+            drawCollectibles();
+            drawObstacles();
+            drawSOSPlane();
+            drawParachute();
+          }
+
+          drawPlayerPlane();
+          drawWeatherOverlay();
+          drawParticlesAndConfetti();
+        } finally {
+          ctx.restore();
         }
-
-        drawSky();
-
-        const isStormy = (game.state !== 'MENU' && game.state !== 'BRIEFING')
-          && (game.mission.theme === 'storm' || game.mission.theme === 'emergency');
-        const cloudColor = isStormy ? 'rgba(148, 163, 184, 0.5)' : 'rgba(255, 255, 255, 0.82)';
-        game.bgClouds.forEach(c => drawSoftCloud(c.x, c.y, c.scale, cloudColor));
-
-        drawHills();
-        drawAirport();
-
-        if (game.state === 'PLAYING' || game.state === 'APPROACH' || game.state === 'LANDING') {
-          drawCollectibles();
-          drawObstacles();
-          drawSOSPlane();
-          drawParachute();
-        }
-
-        drawPlayerPlane();
-        drawWeatherOverlay();
-        drawParticlesAndConfetti();
-        ctx.restore();
       }
 
       // =======================================================================
@@ -3026,6 +3043,30 @@
       });
 
       window.addEventListener('pointerup', () => {
+        game.pointerActive = false;
+      });
+      window.addEventListener('pointercancel', () => {
+        game.pointerActive = false;
+      });
+
+      // Pengaman sentuhan khusus Safari iOS 15 agar layar tidak memantul/mengubah tinggi kanvas
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          e.preventDefault();
+          AudioEngine.init();
+          game.pointerActive = true;
+          setTargetFromClientY(e.touches[0].clientY);
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchmove', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          e.preventDefault();
+          setTargetFromClientY(e.touches[0].clientY);
+        }
+      }, { passive: false });
+
+      canvas.addEventListener('touchend', () => {
         game.pointerActive = false;
       });
 
@@ -3099,33 +3140,47 @@
       // =======================================================================
       let lastTime = 0;
 
+      const debugErrorEl = document.getElementById('debug-error');
+      let lastErrorShown = '';
+
+      function reportError(err) {
+        if (!debugErrorEl) return;
+        const msg = (err && (err.message || String(err))) || 'Unknown error';
+        if (msg !== lastErrorShown) {
+          lastErrorShown = msg;
+          debugErrorEl.textContent = 'Info Teknis v4: ' + msg;
+          debugErrorEl.style.display = 'block';
+        }
+      }
+
       function gameLoop(timestamp) {
         requestAnimationFrame(gameLoop);
         if (!lastTime) lastTime = timestamp;
-        const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+        const rawDt = (timestamp - lastTime) / 1000;
+        const dt = Math.max(0, Math.min(Number.isFinite(rawDt) ? rawDt : 0.016, 0.05));
         lastTime = timestamp;
 
         try {
           update(dt);
           render();
         } catch (err) {
-          // Jaga agar game loop tidak pernah berhenti total di browser lama
+          reportError(err);
         }
       }
 
-      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('resize', () => resizeCanvas(false));
       window.addEventListener('orientationchange', () => {
-        setTimeout(resizeCanvas, 120);
-        setTimeout(resizeCanvas, 320);
+        setTimeout(() => resizeCanvas(true), 120);
+        setTimeout(() => resizeCanvas(true), 350);
       });
 
       if (typeof ResizeObserver !== 'undefined') {
-        const ro = new ResizeObserver(() => resizeCanvas());
+        const ro = new ResizeObserver(() => resizeCanvas(false));
         ro.observe(wrapper);
       }
 
       window.onload = function () {
-        resizeCanvas();
+        resizeCanvas(true);
         initAmbientBackground();
         requestAnimationFrame(gameLoop);
       };
@@ -3134,7 +3189,9 @@
       // =======================================================================
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(() => {});
+          navigator.serviceWorker.register('./sw.js').then((reg) => {
+            if (reg && reg.update) reg.update().catch(() => {});
+          }).catch(() => {});
         });
       }
 
