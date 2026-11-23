@@ -36,6 +36,7 @@
 
     .overlay, .card, button, .plane-card, .mission-card, .sens-btn, .quiz-btn {
       touch-action: manipulation;
+      cursor: pointer;
     }
 
     html, body {
@@ -1186,7 +1187,7 @@
         </div>
 
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v9</span></p>
+        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v10</span></p>
 
         <div class="card-scroll-body">
           <!-- 1. Pilih Jenis Pesawat -->
@@ -1415,7 +1416,7 @@
   <script>
     /**
      * =========================================================================
-     * KAPTEN LANGIT: MISI PENYELAMATAN (v9)
+     * KAPTEN LANGIT: MISI PENYELAMATAN (v10)
      * - Analog Virtual 2-Sumbu (Naik/Turun + Kecepatan)
      * - Tombol Tembak & Rudal (Pesawat Militer), Tali (Helikopter), Siram Air
      * - 6 Jenis Pesawat & 7 Misi Edukasi Anak Usia 5-8 Tahun
@@ -2141,7 +2142,7 @@
           txt = txt.replace(/\((\d+)\/(\d+)\)/g, ', $1 dari $2.');
           txt = txt.replace(/\+1\s*Hati/gi, 'tambah satu hati');
           txt = txt.replace(/100%/g, 'seratus persen');
-          txt = txt.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF\uFE00-\uFE0F➔▲▼•]/g, ' ');
+          txt = txt.replace(/[\u2600-\u27BF\uFE00-\uFE0F➔▲▼•]/g, ' ').replace(/[^\x20-\x7E\u00A0-\u024F]/g, ' ');
           txt = txt.replace(/\s+/g, ' ').trim();
           return txt;
         },
@@ -5257,10 +5258,18 @@
         const msg = (err && (err.message || String(err))) || 'Unknown error';
         if (msg !== lastErrorShown) {
           lastErrorShown = msg;
-          debugErrorEl.textContent = 'Info Teknis v9: ' + msg;
+          debugErrorEl.textContent = 'Info Teknis v10: ' + msg;
           debugErrorEl.style.display = 'block';
         }
       }
+
+      window.addEventListener('error', (ev) => {
+        reportError(ev && (ev.error || ev.message));
+      });
+
+      window.addEventListener('unhandledrejection', (ev) => {
+        reportError(ev && ev.reason);
+      });
 
       function gameLoop(timestamp) {
         requestAnimationFrame(gameLoop);
@@ -5294,12 +5303,23 @@
       document.addEventListener('pointerdown', unlockAudioOnAnyGesture, { passive: true });
       document.addEventListener('touchstart', unlockAudioOnAnyGesture, { passive: true });
 
-      window.onload = function () {
-        Narrator.init();
-        resizeCanvas(true);
-        initAmbientBackground();
-        requestAnimationFrame(gameLoop);
-      };
+      let appBooted = false;
+      function bootGameApp() {
+        if (appBooted) return;
+        appBooted = true;
+        try {
+          Narrator.init();
+          resizeCanvas(true);
+          initAmbientBackground();
+          requestAnimationFrame(gameLoop);
+        } catch (err) {
+          reportError(err);
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', bootGameApp);
+      window.addEventListener('load', bootGameApp);
+      setTimeout(bootGameApp, 300);
 
       // =======================================================================
       // 12. REGISTRASI PWA (SERVICE WORKER & TOMBOL PASANG DI HP)
