@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kapten-langit-v11';
+const CACHE_NAME = 'kapten-langit-v12';
 const ASSETS = [
   './',
   './index.html',

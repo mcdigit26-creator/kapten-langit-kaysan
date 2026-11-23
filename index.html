@@ -25,24 +25,9 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      -webkit-tap-highlight-color: rgba(2, 132, 199, 0.22);
-    }
-
-    html, body, #game-wrapper, .overlay, .card {
       user-select: none;
       -webkit-user-select: none;
       -webkit-touch-callout: none;
-    }
-
-    .overlay, .card, button, .plane-card, .mission-card, .sens-btn, .quiz-btn {
-      touch-action: manipulation;
-      cursor: pointer;
-      position: relative;
-    }
-
-    button, .plane-card, .mission-card, .sens-btn, .quiz-btn {
-      -webkit-user-select: none;
-      user-select: none;
     }
 
     html, body {
@@ -70,8 +55,6 @@
       width: 100%;
       height: 100%;
       touch-action: none;
-      position: relative;
-      z-index: 1;
     }
 
     /* =====================================================================
@@ -113,7 +96,6 @@
       touch-action: pan-y;
       padding-right: 2px;
       flex: 1 1 auto;
-      min-height: 0;
     }
 
     @keyframes popIn {
@@ -274,50 +256,6 @@
 
     .btn-narrator-pill.speaking {
       background: #dcfce7;
-      border-color: #22c55e;
-      color: #14532d;
-      box-shadow: 0 3px 0 #16a34a;
-    }
-
-    .btn-music-pill {
-      background: #e0e7ff;
-      border-color: #818cf8;
-      color: #3730a3;
-      box-shadow: 0 3px 0 #6366f1;
-    }
-
-    .btn-music-pill.off {
-      background: #f1f5f9;
-      border-color: #cbd5e1;
-      color: #64748b;
-      box-shadow: 0 3px 0 #cbd5e1;
-    }
-
-    .sens-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .sens-btn {
-      background: #f8fafc;
-      border: 2.5px solid #cbd5e1;
-      border-radius: 14px;
-      padding: 6px 6px;
-      font-family: inherit;
-      font-size: clamp(0.72rem, 1.85vmin, 0.86rem);
-      font-weight: 700;
-      color: #334155;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-    }
-
-    .sens-btn.selected {
-      background: linear-gradient(180deg, #dcfce7 0%, #bbf7d0 100%);
       border-color: #22c55e;
       color: #14532d;
       box-shadow: 0 3px 0 #16a34a;
@@ -689,14 +627,6 @@
       flex-direction: column;
       align-items: flex-end;
       gap: 6px;
-    }
-
-    .hud-pills-mini-row {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
     }
 
     /* Stik Analog Virtual 2-Sumbu (Atas/Bawah = Ketinggian, Kiri/Kanan = Kecepatan) */
@@ -1160,10 +1090,10 @@
 
         <div class="analog-cluster">
           <div class="hud-pills-mini-row">
-            <button class="speed-badge-btn" id="btn-smooth-cycle" title="Ubah kehalusan gerak naik turun pesawat">
+            <button type="button" class="speed-badge-btn" id="btn-smooth-cycle" title="Ubah kehalusan gerak naik turun pesawat">
               🪶 Lembut
             </button>
-            <button class="speed-badge-btn" id="btn-speed-cycle" title="Ketuk atau geser analog kiri/kanan untuk ubah kecepatan">
+            <button type="button" class="speed-badge-btn" id="btn-speed-cycle" title="Ketuk atau geser analog kiri/kanan untuk ubah kecepatan">
               ✈️ Normal
             </button>
           </div>
@@ -1195,7 +1125,7 @@
         </div>
 
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v11</span></p>
+        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v12</span></p>
 
         <div class="card-scroll-body">
           <!-- 1. Pilih Jenis Pesawat -->
@@ -1405,12 +1335,12 @@
       </div>
     </div>
 
-    <div id="screen-goodbye" class="overlay hidden" style="position:fixed; inset:0; background:#0284c7; z-index:9999;">
-      <div class="card" style="max-width:460px; background:#ffffff; opacity:1;">
+    <div id="screen-goodbye" class="overlay hidden" style="background:linear-gradient(180deg, #0284c7 0%, #38bdf8 100%); z-index:50;">
+      <div class="card" style="max-width:460px;">
         <div class="briefing-icon">🫡✈️</div>
-        <h2 class="game-title" style="color:#0284c7;">Sampai Jumpa, Kapten!</h2>
-        <div class="edu-box" style="background:#eff6ff; color:#1e3a8a;">
-          Terima kasih sudah bertugas menyelamatkan langit dan lautan hari ini! Tekan tombol Home atau geser layar ke atas untuk menutup aplikasi, atau ketuk tombol di bawah untuk bermain lagi.
+        <h2 class="game-title">Sampai Jumpa, Kapten!</h2>
+        <div class="edu-box">
+          Terima kasih sudah bertugas menyelamatkan langit dan lautan hari ini! Kamu bisa menutup tab browser atau kembali bermain kapan saja.
         </div>
         <div class="btn-row">
           <button class="btn btn-success" id="btn-reopen-app">🔄 Buka Permainan Lagi</button>
@@ -1424,7 +1354,7 @@
   <script>
     /**
      * =========================================================================
-     * KAPTEN LANGIT: MISI PENYELAMATAN (v11)
+     * KAPTEN LANGIT: MISI PENYELAMATAN (v12)
      * - Analog Virtual 2-Sumbu (Naik/Turun + Kecepatan)
      * - Tombol Tembak & Rudal (Pesawat Militer), Tali (Helikopter), Siram Air
      * - 6 Jenis Pesawat & 7 Misi Edukasi Anak Usia 5-8 Tahun
@@ -1443,7 +1373,6 @@
         { name: 'Cepat',  icon: '🚀', mult: 1.45, engineFreq: 112, propRate: 56, agility: 1.0 }
       ];
 
-      // 3 Pilihan Kehalusan Gerak Naik-Turun (agar perpindahan halus & tidak mendadak)
       const SMOOTH_LEVELS = [
         { name: 'Lembut', icon: '🪶', climbSpeed: 185, damping: 4.4 },
         { name: 'Sedang', icon: '✈️', climbSpeed: 255, damping: 6.8 },
@@ -1672,21 +1601,18 @@
             if (this.ctx.state !== 'running') {
               this.ctx.resume().catch(() => {});
             }
-            if (this.musicEnabled && !this.muted) {
-              this.startMusic();
-            }
+            if (this.musicEnabled && !this.muted) this.startMusic();
           } catch (e) {}
         },
 
-        // Backsound ringan & energik (Ceria Sky Adventure 122 BPM)
+
         startMusic() {
           if (this.bgmTimer || !this.ctx || !this.musicEnabled || this.muted) return;
-          // Pola melodi 32 langkah eighth-note (C - G - Am - F -> C - G - F - G)
           const melodyNotes = [
-            523.25, 0, 659.25, 783.99, 659.25, 0, 523.25, 659.25, // C
-            587.33, 0, 783.99, 880.00, 783.99, 0, 587.33, 0,      // G
-            523.25, 0, 659.25, 880.00, 783.99, 659.25, 523.25, 0, // Am
-            698.46, 0, 880.00, 783.99, 659.25, 0, 587.33, 0       // F -> G
+            523.25, 0, 659.25, 783.99, 659.25, 0, 523.25, 659.25,
+            587.33, 0, 783.99, 880.00, 783.99, 0, 587.33, 0,
+            523.25, 0, 659.25, 880.00, 783.99, 659.25, 523.25, 0,
+            698.46, 0, 880.00, 783.99, 659.25, 0, 587.33, 0
           ];
           const bassNotes = [
             130.81, 0, 196.00, 0, 130.81, 0, 196.00, 0,
@@ -1702,18 +1628,12 @@
 
             const step = this.bgmStep % 32;
             this.bgmStep += 1;
-
             const duck = (typeof Narrator !== 'undefined' && Narrator.isSpeaking) ? 0.25 : 1.0;
             const mFreq = melodyNotes[step];
             const bFreq = bassNotes[step];
 
-            if (mFreq > 0) {
-              this.playTone(mFreq, 'triangle', 0.21, 0.095 * duck, null, 0);
-            }
-            if (bFreq > 0) {
-              this.playTone(bFreq, 'triangle', 0.23, 0.085 * duck, null, 0);
-            }
-            // Ketukan ritmis ringan di ketukan ganjil (off-beat shaker)
+            if (mFreq > 0) this.playTone(mFreq, 'triangle', 0.21, 0.095 * duck, null, 0);
+            if (bFreq > 0) this.playTone(bFreq, 'triangle', 0.23, 0.085 * duck, null, 0);
             if (step % 2 === 1 && this.noiseBuffer) {
               try {
                 const now = this.ctx.currentTime;
@@ -1872,11 +1792,9 @@
           document.getElementById('btn-mute-menu').innerHTML = html;
           if (this.muted) {
             this.stopContinuous();
-            this.stopMusic();
             Narrator.stop();
           } else {
             this.init();
-            if (this.musicEnabled) this.startMusic();
             this.playClick();
           }
         },
@@ -2082,7 +2000,7 @@
 
 
       // =======================================================================
-      // 2B. MESIN NARASI SUARA BAHASA INDONESIA v8 (ANTI-RACE-CONDITION & FALLBACK)
+      // 2B. MESIN NARASI SUARA BAHASA INDONESIA v7 (ANTI-MACET iOS & ANDROID)
       // =======================================================================
       const isAndroid = /Android/i.test(navigator.userAgent || '');
 
@@ -2090,11 +2008,9 @@
         enabled: true,
         supported: typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined',
         voice: null,
-        voiceFailed: false,
         isSpeaking: false,
-        currentUtter: null,
-        sessionId: 0,
-        queue: [],
+        currentUtter: null,   // Simpan referensi agar tidak dihapus Garbage Collector iOS/Android
+        queue: [],            // Antrean kalimat pendek agar tidak kena bug macet 15 detik
         watchdogTimer: null,
         lastGlobalSpeakTime: 0,
         lastSpokenMap: {},
@@ -2108,6 +2024,7 @@
             };
           } catch (e) {}
 
+          // Reset otomatis jika user kembali dari tab lain / minimize aplikasi
           document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
               this.stop();
@@ -2118,7 +2035,7 @@
         },
 
         _pickVoice() {
-          if (!this.supported || this.voiceFailed) return;
+          if (!this.supported) return;
           try {
             const voices = window.speechSynthesis.getVoices() || [];
             if (!voices.length) return;
@@ -2131,6 +2048,7 @@
             });
 
             if (idVoices.length > 0) {
+              // Prioritaskan suara Google Indonesia / Damayanti yang paling natural
               const preferred = idVoices.find(v => {
                 const n = (v.name || '').toLowerCase();
                 return n.includes('google') || n.includes('damayanti') || n.includes('natural') || n.includes('online');
@@ -2156,6 +2074,7 @@
         },
 
         _splitIntoChunks(text) {
+          // Pecah kalimat panjang menjadi potongan pendek <= 115 karakter agar TTS HP tidak pernah macet
           const rawParts = text.split(/(?<=[.!?])\s+/);
           const chunks = [];
           rawParts.forEach(part => {
@@ -2187,20 +2106,18 @@
           }
         },
 
-        _startWatchdog(sid, maxDurationMs) {
+        _startWatchdog(maxDurationMs) {
           this._clearWatchdog();
           const startedAt = performance.now();
           this.watchdogTimer = setInterval(() => {
-            if (sid !== this.sessionId) {
-              this._clearWatchdog();
-              return;
-            }
             try {
+              // Atasi bug Chrome Android yang sering menjeda speechSynthesis diam-diam
               if (window.speechSynthesis && window.speechSynthesis.paused) {
                 window.speechSynthesis.resume();
               }
             } catch (e) {}
 
+            // Pengaman jika event onend tidak terpanggil oleh OS
             if (performance.now() - startedAt > maxDurationMs) {
               this._clearWatchdog();
               this.queue = [];
@@ -2208,11 +2125,10 @@
               this.isSpeaking = false;
               this._updatePillState();
             }
-          }, 500);
+          }, 600);
         },
 
-        _speakNextInQueue(sid, rate, pitch, useVoiceObj) {
-          if (sid !== this.sessionId) return;
+        _speakNextInQueue(rate, pitch) {
           if (!this.enabled || AudioEngine.muted || this.queue.length === 0) {
             this._clearWatchdog();
             this.currentUtter = null;
@@ -2225,28 +2141,22 @@
           try {
             const utter = new SpeechSynthesisUtterance(nextText);
             utter.lang = 'id-ID';
-            if (useVoiceObj && this.voice && !this.voiceFailed) {
-              utter.voice = this.voice;
-            }
+            if (this.voice) utter.voice = this.voice;
             utter.rate = rate;
             utter.pitch = pitch;
             utter.volume = 1.0;
 
+            // Wajib simpan ke properti objek agar tidak dihapus Garbage Collector Safari/Chrome
             this.currentUtter = utter;
-            this.isSpeaking = true;
-            this._updatePillState();
 
             utter.onstart = () => {
-              if (sid !== this.sessionId) return;
               this.isSpeaking = true;
               this._updatePillState();
             };
 
             utter.onend = () => {
-              // Abaikan event terlambat dari kalimat lama yang sudah dibatalkan!
-              if (sid !== this.sessionId) return;
               if (this.queue.length > 0) {
-                this._speakNextInQueue(sid, rate, pitch, useVoiceObj);
+                this._speakNextInQueue(rate, pitch);
               } else {
                 this._clearWatchdog();
                 this.currentUtter = null;
@@ -2255,21 +2165,7 @@
               }
             };
 
-            utter.onerror = (ev) => {
-              // Abaikan error 'canceled'/'interrupted' atau event dari sesi lama
-              if (sid !== this.sessionId) return;
-              const errCode = (ev && ev.error) || '';
-              if (errCode === 'canceled' || errCode === 'interrupted') {
-                return;
-              }
-              // Jika gagal memakai objek voice tertentu di Android, coba ulang sekali tanpa utter.voice (pakai lang id-ID saja)
-              if (useVoiceObj && this.voice) {
-                this.voiceFailed = true;
-                this.voice = null;
-                this.queue.unshift(nextText);
-                this._speakNextInQueue(sid, rate, pitch, false);
-                return;
-              }
+            utter.onerror = () => {
               this._clearWatchdog();
               this.queue = [];
               this.currentUtter = null;
@@ -2277,12 +2173,12 @@
               this._updatePillState();
             };
 
-            const estMs = Math.max(4500, nextText.length * 115);
-            this._startWatchdog(sid, estMs);
+            const estMs = Math.max(4500, nextText.length * 110);
+            this._startWatchdog(estMs);
 
+            // Panggil speak() secara sinkron tanpa setTimeout agar izin sentuhan iOS & Android selalu valid
             window.speechSynthesis.speak(utter);
           } catch (e) {
-            if (sid !== this.sessionId) return;
             this._clearWatchdog();
             this.queue = [];
             this.currentUtter = null;
@@ -2299,6 +2195,7 @@
           const now = performance.now();
           const interrupt = opts.interrupt !== false;
 
+          // Cegah tabrakan spam cancel() saat bermain (jika tidak dipicu klik langsung)
           if (!interrupt) {
             if (this.isSpeaking || (now - this.lastGlobalSpeakTime < 2200)) {
               return;
@@ -2313,10 +2210,9 @@
           this.lastSpokenMap[key] = now;
           this.lastGlobalSpeakTime = now;
 
-          if (!this.voice && !this.voiceFailed) this._pickVoice();
+          if (!this.voice) this._pickVoice();
 
-          // Naikkan sessionId SEBELUM cancel() agar onerror dari utterance lama langsung diabaikan
-          const sid = ++this.sessionId;
+          // Hentikan antrean lama secara bersih sebelum mulai kalimat baru
           this._clearWatchdog();
           this.queue = [];
           this.currentUtter = null;
@@ -2331,11 +2227,10 @@
           const pitch = opts.pitch || (isAndroid ? 1.0 : 1.08);
 
           this.queue = this._splitIntoChunks(text);
-          this._speakNextInQueue(sid, rate, pitch, true);
+          this._speakNextInQueue(rate, pitch);
         },
 
         stop() {
-          this.sessionId += 1;
           this._clearWatchdog();
           this.queue = [];
           this.currentUtter = null;
@@ -2655,7 +2550,6 @@
         ui.hud.classList.add('hidden');
         ui.screenGoodbye.classList.remove('hidden');
 
-        // Panggil bridge native jika dibungkus APK WebView, tanpa merusak rendering Chrome Android biasa
         try {
           if (window.Android && typeof window.Android.closeApp === 'function') {
             window.Android.closeApp();
@@ -2788,7 +2682,6 @@
       function goToMenu() {
         AudioEngine.playClick();
         AudioEngine.stopContinuous();
-        if (AudioEngine.musicEnabled && !AudioEngine.muted) AudioEngine.startMusic();
         Narrator.stop();
         clearAlarm();
         game.state = 'MENU';
@@ -3383,11 +3276,9 @@
         // KONTROL GERAK PESAWAT HALUS (ANALOG VIRTUAL + KEYBOARD)
         const sm = SMOOTH_LEVELS[game.smoothIndex] || SMOOTH_LEVELS[0];
         const climbSpeed = sm.climbSpeed * Math.max(0.85, H / 520) * planeCfg.agilityMult;
-
         if (game.keys.up) p.targetY -= climbSpeed * dt;
         if (game.keys.down) p.targetY += climbSpeed * dt;
         if (game.analog.active && Math.abs(game.analog.ny) > 0.08) {
-          // Kurva kuadratik agar gerakan kecil tetap lembut dan tidak mendadak
           const curvedNy = Math.sign(game.analog.ny) * Math.pow(Math.abs(game.analog.ny), 1.55);
           p.targetY += curvedNy * climbSpeed * dt;
         }
@@ -4944,17 +4835,6 @@
           drawPlayerPlane();
           drawWeatherOverlay();
           drawParticlesAndConfetti();
-
-          if (game.state === 'GOODBYE') {
-            ctx.fillStyle = 'rgba(2, 132, 199, 0.88)';
-            ctx.fillRect(0, 0, W, H);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `bold ${Math.max(18, Math.round(24 * layout.scale))}px Fredoka, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText('🫡 Sampai Jumpa, Kapten!', W * 0.5, H * 0.45);
-            ctx.font = `600 ${Math.max(13, Math.round(15 * layout.scale))}px Fredoka, sans-serif`;
-            ctx.fillText('Terima kasih sudah bermain Kapten Langit!', W * 0.5, H * 0.53);
-          }
         } finally {
           ctx.restore();
         }
@@ -5063,34 +4943,31 @@
         }
       });
 
-      // Geser relatif di area langit (halus, tanpa lompatan mendadak)
-      let lastCanvasTouchY = null;
+      // Sentuh langsung area langit juga tetap berfungsi sebagai kontrol alternatif
+      function setTargetFromClientY(clientY) {
+        if (game.state !== 'PLAYING' && game.state !== 'APPROACH') return;
+        const rect = canvas.getBoundingClientRect();
+        game.player.targetY = clientY - rect.top;
+      }
 
       canvas.addEventListener('touchstart', (e) => {
         if (e.touches && e.touches.length > 0) {
           e.preventDefault();
           AudioEngine.init();
           game.pointerActive = true;
-          lastCanvasTouchY = e.touches[0].clientY;
+          setTargetFromClientY(e.touches[0].clientY);
         }
       }, { passive: false });
 
       canvas.addEventListener('touchmove', (e) => {
         if (e.touches && e.touches.length > 0) {
           e.preventDefault();
-          if (game.state !== 'PLAYING' && game.state !== 'APPROACH') return;
-          const curY = e.touches[0].clientY;
-          if (lastCanvasTouchY !== null) {
-            const deltaY = curY - lastCanvasTouchY;
-            game.player.targetY += deltaY * 0.75;
-          }
-          lastCanvasTouchY = curY;
+          setTargetFromClientY(e.touches[0].clientY);
         }
       }, { passive: false });
 
       canvas.addEventListener('touchend', () => {
         game.pointerActive = false;
-        lastCanvasTouchY = null;
       });
 
       // Keyboard lengkap
@@ -5121,74 +4998,39 @@
       });
 
       // Tombol kecepatan & aksi layar sentuh
-      bindTap(ui.btnSpeedCycle, () => {
+      ui.btnSpeedCycle.addEventListener('click', (e) => {
+        e.stopPropagation();
         setSpeed((game.speedIndex + 1) % 3);
       });
 
-      bindTap(ui.btnShoot, () => {
+      ui.btnShoot.addEventListener('click', (e) => {
+        e.stopPropagation();
         fireBullet();
       });
 
-      bindTap(ui.btnMissile, () => {
+      ui.btnMissile.addEventListener('click', (e) => {
+        e.stopPropagation();
         fireMissile();
       });
 
-      bindTap(ui.btnRope, () => {
+      ui.btnRope.addEventListener('click', (e) => {
+        e.stopPropagation();
         triggerRescueRope();
       });
 
-      bindTap(ui.btnWater, () => {
+      ui.btnWater.addEventListener('click', (e) => {
+        e.stopPropagation();
         dropWaterBomb();
       });
 
-      bindTap(document.getElementById('btn-radar'), () => {
+      document.getElementById('btn-radar').addEventListener('click', (e) => {
+        e.stopPropagation();
         activateRadar();
       });
 
-      // Helper tap/click aman iOS 15 (mencegah double-fire antara touchend dan click)
-      function bindTap(el, handler) {
-        if (!el) return;
-        let touchHandledAt = 0;
-
-        el.addEventListener('touchend', (e) => {
-          if (e.cancelable) e.preventDefault();
-          e.stopPropagation();
-          touchHandledAt = Date.now();
-          handler(e);
-        }, { passive: false });
-
-        el.addEventListener('click', (e) => {
-          if (Date.now() - touchHandledAt < 550) {
-            e.stopPropagation();
-            return;
-          }
-          e.stopPropagation();
-          handler(e);
-        });
-      }
-
-      const missionCards = Array.from(document.querySelectorAll('.mission-card'));
-
-      function handleSelectMission(mIdx) {
-        missionCards.forEach(c => c.classList.remove('selected'));
-        const activeCard = missionCards.find(c => parseInt(c.dataset.mission, 10) === mIdx);
-        if (activeCard) activeCard.classList.add('selected');
-        game.selectedMission = mIdx;
-        const mObj = MISSIONS[mIdx];
-        const rec = mObj && mObj.recommendedPlane;
-        if (rec) {
-          selectPlane(rec);
-        }
-        if (mObj) {
-          const tagEl = activeCard ? activeCard.querySelector('.mission-tag') : null;
-          const tagTxt = tagEl ? tagEl.textContent : '';
-          Narrator.speak(`${mObj.shortName}. ${tagTxt}.`, { interrupt: true });
-        }
-      }
-
       // Pemilihan Pesawat & Misi di Menu (dengan Narasi Suara Bahasa Indonesia)
       document.querySelectorAll('.plane-card').forEach((card) => {
-        bindTap(card, () => {
+        card.addEventListener('click', () => {
           AudioEngine.init();
           AudioEngine.playClick();
           const pId = card.dataset.plane;
@@ -5200,73 +5042,94 @@
         });
       });
 
+      const missionCards = document.querySelectorAll('.mission-card');
       missionCards.forEach((card) => {
-        bindTap(card, () => {
+        card.addEventListener('click', () => {
           AudioEngine.init();
           AudioEngine.playClick();
+          missionCards.forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
           const mIdx = parseInt(card.dataset.mission, 10);
-          handleSelectMission(mIdx);
+          game.selectedMission = mIdx;
+          const mObj = MISSIONS[mIdx];
+          const rec = mObj && mObj.recommendedPlane;
+          if (rec) {
+            selectPlane(rec);
+          }
+          if (mObj) {
+            const tagEl = card.querySelector('.mission-tag');
+            const tagTxt = tagEl ? tagEl.textContent : '';
+            Narrator.speak(`${mObj.shortName}. ${tagTxt}.`, { interrupt: true });
+          }
         });
       });
 
-      bindTap(document.getElementById('btn-music-hud'), () => AudioEngine.toggleMusic());
-      bindTap(document.getElementById('btn-music-menu'), () => AudioEngine.toggleMusic());
-      bindTap(document.getElementById('btn-narrator-hud'), () => Narrator.toggle());
-      bindTap(document.getElementById('btn-narrator-menu'), () => Narrator.toggle());
 
+      document.getElementById('btn-music-hud').addEventListener('click', () => AudioEngine.toggleMusic());
+      document.getElementById('btn-music-menu').addEventListener('click', () => AudioEngine.toggleMusic());
       document.querySelectorAll('.sens-btn').forEach((btn) => {
-        bindTap(btn, () => {
+        btn.addEventListener('click', () => {
           const idx = parseInt(btn.dataset.smooth, 10);
           setSmoothness(idx, true);
           const sm = SMOOTH_LEVELS[idx];
           if (sm) Narrator.speak(`Gerak pesawat ${sm.name}.`, { interrupt: true });
         });
       });
+      if (ui.btnSmoothCycle) {
+        ui.btnSmoothCycle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          setSmoothness((game.smoothIndex + 1) % 3, true);
+        });
+      }
 
-      bindTap(ui.btnSmoothCycle, () => {
-        setSmoothness((game.smoothIndex + 1) % 3, true);
-      });
-      bindTap(document.getElementById('btn-replay-brief'), () => {
+      document.getElementById('btn-narrator-hud').addEventListener('click', () => Narrator.toggle());
+      document.getElementById('btn-narrator-menu').addEventListener('click', () => Narrator.toggle());
+      document.getElementById('btn-replay-brief').addEventListener('click', (e) => {
+        e.stopPropagation();
         AudioEngine.init();
         speakCurrentBriefing();
       });
-      bindTap(document.getElementById('btn-replay-quiz'), () => {
+      document.getElementById('btn-replay-quiz').addEventListener('click', (e) => {
+        e.stopPropagation();
         AudioEngine.init();
         if (game.currentQuizSpeech) Narrator.speak(game.currentQuizSpeech, { interrupt: true });
       });
-      bindTap(document.getElementById('btn-replay-rest'), () => {
+      document.getElementById('btn-replay-rest').addEventListener('click', (e) => {
+        e.stopPropagation();
         AudioEngine.init();
         Narrator.speak('Pesawat butuh istirahat! Tidak apa-apa, Kapten! Pesawat sudah diperbaiki lagi. Ayo coba terbang sekali lagi ya!', { interrupt: true });
       });
 
       // Navigasi & Keluar Aplikasi
-      bindTap(document.getElementById('btn-start-menu'), () => {
+      document.getElementById('btn-start-menu').addEventListener('click', () => {
         openBriefing(game.selectedMission);
       });
-      bindTap(document.getElementById('btn-brief-back'), goToMenu);
-      bindTap(document.getElementById('btn-brief-fly'), startMission);
+      document.getElementById('btn-brief-back').addEventListener('click', goToMenu);
+      document.getElementById('btn-brief-fly').addEventListener('click', startMission);
 
-      bindTap(document.getElementById('btn-home-hud'), goToMenu);
-      bindTap(document.getElementById('btn-mute-hud'), () => AudioEngine.toggleMute());
-      bindTap(document.getElementById('btn-mute-menu'), () => AudioEngine.toggleMute());
-      bindTap(document.getElementById('btn-fs-hud'), toggleFullscreen);
-      bindTap(document.getElementById('btn-fs-menu'), toggleFullscreen);
+      document.getElementById('btn-home-hud').addEventListener('click', goToMenu);
+      document.getElementById('btn-mute-hud').addEventListener('click', () => AudioEngine.toggleMute());
+      document.getElementById('btn-mute-menu').addEventListener('click', () => AudioEngine.toggleMute());
+      document.getElementById('btn-fs-hud').addEventListener('click', toggleFullscreen);
+      document.getElementById('btn-fs-menu').addEventListener('click', toggleFullscreen);
 
-      bindTap(document.getElementById('btn-exit-menu'), openExitConfirm);
-      bindTap(document.getElementById('btn-exit-hud'), openExitConfirm);
-      bindTap(document.getElementById('btn-exit-cancel'), closeExitConfirm);
-      bindTap(document.getElementById('btn-exit-yes'), executeExitApp);
-      bindTap(document.getElementById('btn-reopen-app'), goToMenu);
+      document.getElementById('btn-exit-menu').addEventListener('click', openExitConfirm);
+      document.getElementById('btn-exit-hud').addEventListener('click', openExitConfirm);
+      document.getElementById('btn-exit-cancel').addEventListener('click', closeExitConfirm);
+      document.getElementById('btn-exit-yes').addEventListener('click', executeExitApp);
+      document.getElementById('btn-reopen-app').addEventListener('click', goToMenu);
 
-      bindTap(document.getElementById('btn-win-menu'), goToMenu);
-      bindTap(document.getElementById('btn-win-next'), () => {
+      document.getElementById('btn-win-menu').addEventListener('click', goToMenu);
+      document.getElementById('btn-win-next').addEventListener('click', () => {
         const nextIdx = (game.selectedMission + 1) % MISSIONS.length;
-        handleSelectMission(nextIdx);
+        missionCards.forEach((c, idx) => c.classList.toggle('selected', idx === nextIdx));
+        const rec = MISSIONS[nextIdx] && MISSIONS[nextIdx].recommendedPlane;
+        if (rec) selectPlane(rec);
         openBriefing(nextIdx);
       });
 
-      bindTap(document.getElementById('btn-rest-menu'), goToMenu);
-      bindTap(document.getElementById('btn-rest-retry'), startMission);
+      document.getElementById('btn-rest-menu').addEventListener('click', goToMenu);
+      document.getElementById('btn-rest-retry').addEventListener('click', startMission);
 
       // =======================================================================
       // 11. GAME LOOP & ORIENTASI LAYAR
@@ -5280,18 +5143,10 @@
         const msg = (err && (err.message || String(err))) || 'Unknown error';
         if (msg !== lastErrorShown) {
           lastErrorShown = msg;
-          debugErrorEl.textContent = 'Info Teknis v11: ' + msg;
+          debugErrorEl.textContent = 'Info Teknis v12: ' + msg;
           debugErrorEl.style.display = 'block';
         }
       }
-
-      window.addEventListener('error', (ev) => {
-        reportError(ev && (ev.error || ev.message));
-      });
-
-      window.addEventListener('unhandledrejection', (ev) => {
-        reportError(ev && ev.reason);
-      });
 
       function gameLoop(timestamp) {
         requestAnimationFrame(gameLoop);
@@ -5319,29 +5174,12 @@
         ro.observe(wrapper);
       }
 
-      function unlockAudioOnAnyGesture() {
-        AudioEngine.init();
-      }
-      document.addEventListener('pointerdown', unlockAudioOnAnyGesture, { passive: true });
-      document.addEventListener('touchstart', unlockAudioOnAnyGesture, { passive: true });
-
-      let appBooted = false;
-      function bootGameApp() {
-        if (appBooted) return;
-        appBooted = true;
-        try {
-          Narrator.init();
-          resizeCanvas(true);
-          initAmbientBackground();
-          requestAnimationFrame(gameLoop);
-        } catch (err) {
-          reportError(err);
-        }
-      }
-
-      window.addEventListener('DOMContentLoaded', bootGameApp);
-      window.addEventListener('load', bootGameApp);
-      setTimeout(bootGameApp, 300);
+      window.onload = function () {
+        Narrator.init();
+        resizeCanvas(true);
+        initAmbientBackground();
+        requestAnimationFrame(gameLoop);
+      };
 
       // =======================================================================
       // 12. REGISTRASI PWA (SERVICE WORKER & TOMBOL PASANG DI HP)
