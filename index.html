@@ -37,6 +37,12 @@
     .overlay, .card, button, .plane-card, .mission-card, .sens-btn, .quiz-btn {
       touch-action: manipulation;
       cursor: pointer;
+      position: relative;
+    }
+
+    button, .plane-card, .mission-card, .sens-btn, .quiz-btn {
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     html, body {
@@ -64,6 +70,8 @@
       width: 100%;
       height: 100%;
       touch-action: none;
+      position: relative;
+      z-index: 1;
     }
 
     /* =====================================================================
@@ -1187,7 +1195,7 @@
         </div>
 
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v10</span></p>
+        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v11</span></p>
 
         <div class="card-scroll-body">
           <!-- 1. Pilih Jenis Pesawat -->
@@ -1416,7 +1424,7 @@
   <script>
     /**
      * =========================================================================
-     * KAPTEN LANGIT: MISI PENYELAMATAN (v10)
+     * KAPTEN LANGIT: MISI PENYELAMATAN (v11)
      * - Analog Virtual 2-Sumbu (Naik/Turun + Kecepatan)
      * - Tombol Tembak & Rudal (Pesawat Militer), Tali (Helikopter), Siram Air
      * - 6 Jenis Pesawat & 7 Misi Edukasi Anak Usia 5-8 Tahun
@@ -5113,39 +5121,74 @@
       });
 
       // Tombol kecepatan & aksi layar sentuh
-      ui.btnSpeedCycle.addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(ui.btnSpeedCycle, () => {
         setSpeed((game.speedIndex + 1) % 3);
       });
 
-      ui.btnShoot.addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(ui.btnShoot, () => {
         fireBullet();
       });
 
-      ui.btnMissile.addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(ui.btnMissile, () => {
         fireMissile();
       });
 
-      ui.btnRope.addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(ui.btnRope, () => {
         triggerRescueRope();
       });
 
-      ui.btnWater.addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(ui.btnWater, () => {
         dropWaterBomb();
       });
 
-      document.getElementById('btn-radar').addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(document.getElementById('btn-radar'), () => {
         activateRadar();
       });
 
+      // Helper tap/click aman iOS 15 (mencegah double-fire antara touchend dan click)
+      function bindTap(el, handler) {
+        if (!el) return;
+        let touchHandledAt = 0;
+
+        el.addEventListener('touchend', (e) => {
+          if (e.cancelable) e.preventDefault();
+          e.stopPropagation();
+          touchHandledAt = Date.now();
+          handler(e);
+        }, { passive: false });
+
+        el.addEventListener('click', (e) => {
+          if (Date.now() - touchHandledAt < 550) {
+            e.stopPropagation();
+            return;
+          }
+          e.stopPropagation();
+          handler(e);
+        });
+      }
+
+      const missionCards = Array.from(document.querySelectorAll('.mission-card'));
+
+      function handleSelectMission(mIdx) {
+        missionCards.forEach(c => c.classList.remove('selected'));
+        const activeCard = missionCards.find(c => parseInt(c.dataset.mission, 10) === mIdx);
+        if (activeCard) activeCard.classList.add('selected');
+        game.selectedMission = mIdx;
+        const mObj = MISSIONS[mIdx];
+        const rec = mObj && mObj.recommendedPlane;
+        if (rec) {
+          selectPlane(rec);
+        }
+        if (mObj) {
+          const tagEl = activeCard ? activeCard.querySelector('.mission-tag') : null;
+          const tagTxt = tagEl ? tagEl.textContent : '';
+          Narrator.speak(`${mObj.shortName}. ${tagTxt}.`, { interrupt: true });
+        }
+      }
+
       // Pemilihan Pesawat & Misi di Menu (dengan Narasi Suara Bahasa Indonesia)
       document.querySelectorAll('.plane-card').forEach((card) => {
-        card.addEventListener('click', () => {
+        bindTap(card, () => {
           AudioEngine.init();
           AudioEngine.playClick();
           const pId = card.dataset.plane;
@@ -5157,35 +5200,22 @@
         });
       });
 
-      const missionCards = document.querySelectorAll('.mission-card');
       missionCards.forEach((card) => {
-        card.addEventListener('click', () => {
+        bindTap(card, () => {
           AudioEngine.init();
           AudioEngine.playClick();
-          missionCards.forEach(c => c.classList.remove('selected'));
-          card.classList.add('selected');
           const mIdx = parseInt(card.dataset.mission, 10);
-          game.selectedMission = mIdx;
-          const mObj = MISSIONS[mIdx];
-          const rec = mObj && mObj.recommendedPlane;
-          if (rec) {
-            selectPlane(rec);
-          }
-          if (mObj) {
-            const tagEl = card.querySelector('.mission-tag');
-            const tagTxt = tagEl ? tagEl.textContent : '';
-            Narrator.speak(`${mObj.shortName}. ${tagTxt}.`, { interrupt: true });
-          }
+          handleSelectMission(mIdx);
         });
       });
 
-      document.getElementById('btn-music-hud').addEventListener('click', () => AudioEngine.toggleMusic());
-      document.getElementById('btn-music-menu').addEventListener('click', () => AudioEngine.toggleMusic());
-      document.getElementById('btn-narrator-hud').addEventListener('click', () => Narrator.toggle());
-      document.getElementById('btn-narrator-menu').addEventListener('click', () => Narrator.toggle());
+      bindTap(document.getElementById('btn-music-hud'), () => AudioEngine.toggleMusic());
+      bindTap(document.getElementById('btn-music-menu'), () => AudioEngine.toggleMusic());
+      bindTap(document.getElementById('btn-narrator-hud'), () => Narrator.toggle());
+      bindTap(document.getElementById('btn-narrator-menu'), () => Narrator.toggle());
 
       document.querySelectorAll('.sens-btn').forEach((btn) => {
-        btn.addEventListener('click', () => {
+        bindTap(btn, () => {
           const idx = parseInt(btn.dataset.smooth, 10);
           setSmoothness(idx, true);
           const sm = SMOOTH_LEVELS[idx];
@@ -5193,58 +5223,50 @@
         });
       });
 
-      if (ui.btnSmoothCycle) {
-        ui.btnSmoothCycle.addEventListener('click', (e) => {
-          e.stopPropagation();
-          setSmoothness((game.smoothIndex + 1) % 3, true);
-        });
-      }
-      document.getElementById('btn-replay-brief').addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(ui.btnSmoothCycle, () => {
+        setSmoothness((game.smoothIndex + 1) % 3, true);
+      });
+      bindTap(document.getElementById('btn-replay-brief'), () => {
         AudioEngine.init();
         speakCurrentBriefing();
       });
-      document.getElementById('btn-replay-quiz').addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(document.getElementById('btn-replay-quiz'), () => {
         AudioEngine.init();
         if (game.currentQuizSpeech) Narrator.speak(game.currentQuizSpeech, { interrupt: true });
       });
-      document.getElementById('btn-replay-rest').addEventListener('click', (e) => {
-        e.stopPropagation();
+      bindTap(document.getElementById('btn-replay-rest'), () => {
         AudioEngine.init();
         Narrator.speak('Pesawat butuh istirahat! Tidak apa-apa, Kapten! Pesawat sudah diperbaiki lagi. Ayo coba terbang sekali lagi ya!', { interrupt: true });
       });
 
       // Navigasi & Keluar Aplikasi
-      document.getElementById('btn-start-menu').addEventListener('click', () => {
+      bindTap(document.getElementById('btn-start-menu'), () => {
         openBriefing(game.selectedMission);
       });
-      document.getElementById('btn-brief-back').addEventListener('click', goToMenu);
-      document.getElementById('btn-brief-fly').addEventListener('click', startMission);
+      bindTap(document.getElementById('btn-brief-back'), goToMenu);
+      bindTap(document.getElementById('btn-brief-fly'), startMission);
 
-      document.getElementById('btn-home-hud').addEventListener('click', goToMenu);
-      document.getElementById('btn-mute-hud').addEventListener('click', () => AudioEngine.toggleMute());
-      document.getElementById('btn-mute-menu').addEventListener('click', () => AudioEngine.toggleMute());
-      document.getElementById('btn-fs-hud').addEventListener('click', toggleFullscreen);
-      document.getElementById('btn-fs-menu').addEventListener('click', toggleFullscreen);
+      bindTap(document.getElementById('btn-home-hud'), goToMenu);
+      bindTap(document.getElementById('btn-mute-hud'), () => AudioEngine.toggleMute());
+      bindTap(document.getElementById('btn-mute-menu'), () => AudioEngine.toggleMute());
+      bindTap(document.getElementById('btn-fs-hud'), toggleFullscreen);
+      bindTap(document.getElementById('btn-fs-menu'), toggleFullscreen);
 
-      document.getElementById('btn-exit-menu').addEventListener('click', openExitConfirm);
-      document.getElementById('btn-exit-hud').addEventListener('click', openExitConfirm);
-      document.getElementById('btn-exit-cancel').addEventListener('click', closeExitConfirm);
-      document.getElementById('btn-exit-yes').addEventListener('click', executeExitApp);
-      document.getElementById('btn-reopen-app').addEventListener('click', goToMenu);
+      bindTap(document.getElementById('btn-exit-menu'), openExitConfirm);
+      bindTap(document.getElementById('btn-exit-hud'), openExitConfirm);
+      bindTap(document.getElementById('btn-exit-cancel'), closeExitConfirm);
+      bindTap(document.getElementById('btn-exit-yes'), executeExitApp);
+      bindTap(document.getElementById('btn-reopen-app'), goToMenu);
 
-      document.getElementById('btn-win-menu').addEventListener('click', goToMenu);
-      document.getElementById('btn-win-next').addEventListener('click', () => {
+      bindTap(document.getElementById('btn-win-menu'), goToMenu);
+      bindTap(document.getElementById('btn-win-next'), () => {
         const nextIdx = (game.selectedMission + 1) % MISSIONS.length;
-        missionCards.forEach((c, idx) => c.classList.toggle('selected', idx === nextIdx));
-        const rec = MISSIONS[nextIdx] && MISSIONS[nextIdx].recommendedPlane;
-        if (rec) selectPlane(rec);
+        handleSelectMission(nextIdx);
         openBriefing(nextIdx);
       });
 
-      document.getElementById('btn-rest-menu').addEventListener('click', goToMenu);
-      document.getElementById('btn-rest-retry').addEventListener('click', startMission);
+      bindTap(document.getElementById('btn-rest-menu'), goToMenu);
+      bindTap(document.getElementById('btn-rest-retry'), startMission);
 
       // =======================================================================
       // 11. GAME LOOP & ORIENTASI LAYAR
@@ -5258,7 +5280,7 @@
         const msg = (err && (err.message || String(err))) || 'Unknown error';
         if (msg !== lastErrorShown) {
           lastErrorShown = msg;
-          debugErrorEl.textContent = 'Info Teknis v10: ' + msg;
+          debugErrorEl.textContent = 'Info Teknis v11: ' + msg;
           debugErrorEl.style.display = 'block';
         }
       }
