@@ -1125,7 +1125,7 @@
         </div>
 
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v12</span></p>
+        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v13</span></p>
 
         <div class="card-scroll-body">
           <!-- 1. Pilih Jenis Pesawat -->
@@ -2075,7 +2075,7 @@
 
         _splitIntoChunks(text) {
           // Pecah kalimat panjang menjadi potongan pendek <= 115 karakter agar TTS HP tidak pernah macet
-          const rawParts = text.split(/(?<=[.!?])\s+/);
+          const rawParts = text.replace(/([.!?]+)\s+/g, '$1\n').split('\n');
           const chunks = [];
           rawParts.forEach(part => {
             const p = part.trim();
@@ -5143,7 +5143,7 @@
         const msg = (err && (err.message || String(err))) || 'Unknown error';
         if (msg !== lastErrorShown) {
           lastErrorShown = msg;
-          debugErrorEl.textContent = 'Info Teknis v12: ' + msg;
+          debugErrorEl.textContent = 'Info Teknis v13: ' + msg;
           debugErrorEl.style.display = 'block';
         }
       }
