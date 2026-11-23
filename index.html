@@ -1117,7 +1117,7 @@
         </div>
 
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v6</span></p>
+        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v7</span></p>
 
         <div class="card-scroll-body">
           <!-- 1. Pilih Jenis Pesawat -->
@@ -1338,7 +1338,7 @@
   <script>
     /**
      * =========================================================================
-     * KAPTEN LANGIT: MISI PENYELAMATAN (v6)
+     * KAPTEN LANGIT: MISI PENYELAMATAN (v7)
      * - Analog Virtual 2-Sumbu (Naik/Turun + Kecepatan)
      * - Tombol Tembak & Rudal (Pesawat Militer), Tali (Helikopter), Siram Air
      * - 6 Jenis Pesawat & 7 Misi Edukasi Anak Usia 5-8 Tahun
@@ -1576,7 +1576,6 @@
             if (this.ctx.state !== 'running') {
               this.ctx.resume().catch(() => {});
             }
-            Narrator.unlock();
           } catch (e) {}
         },
 
@@ -1895,15 +1894,19 @@
 
 
       // =======================================================================
-      // 2B. MESIN NARASI SUARA BAHASA INDONESIA (WEB SPEECH API RAMAH ANAK)
+      // 2B. MESIN NARASI SUARA BAHASA INDONESIA v7 (ANTI-MACET iOS & ANDROID)
       // =======================================================================
+      const isAndroid = /Android/i.test(navigator.userAgent || '');
+
       const Narrator = {
         enabled: true,
         supported: typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined',
         voice: null,
-        unlocked: false,
         isSpeaking: false,
-        speakTimer: null,
+        currentUtter: null,   // Simpan referensi agar tidak dihapus Garbage Collector iOS/Android
+        queue: [],            // Antrean kalimat pendek agar tidak kena bug macet 15 detik
+        watchdogTimer: null,
+        lastGlobalSpeakTime: 0,
         lastSpokenMap: {},
 
         init() {
@@ -1914,6 +1917,15 @@
               this._pickVoice();
             };
           } catch (e) {}
+
+          // Reset otomatis jika user kembali dari tab lain / minimize aplikasi
+          document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+              this.stop();
+            } else {
+              this._pickVoice();
+            }
+          });
         },
 
         _pickVoice() {
@@ -1921,34 +1933,28 @@
           try {
             const voices = window.speechSynthesis.getVoices() || [];
             if (!voices.length) return;
-            // Prioritas suara Bahasa Indonesia (id-ID / in-ID / Damayanti / Gadis / Google Indonesia)
+
             const idVoices = voices.filter(v => {
               const lang = (v.lang || '').toLowerCase();
               const name = (v.name || '').toLowerCase();
-              return lang.startsWith('id') || lang.startsWith('in') || name.includes('indonesia') || name.includes('damayanti') || name.includes('gadis');
+              return lang.startsWith('id') || lang.startsWith('in') ||
+                name.includes('indonesia') || name.includes('damayanti') || name.includes('gadis');
             });
-            if (idVoices.length > 0) {
-              this.voice = idVoices[0];
-            }
-          } catch (e) {}
-        },
 
-        unlock() {
-          if (!this.supported || this.unlocked) return;
-          this.unlocked = true;
-          this._pickVoice();
-          try {
-            const u = new SpeechSynthesisUtterance('');
-            u.lang = 'id-ID';
-            u.volume = 0;
-            window.speechSynthesis.speak(u);
+            if (idVoices.length > 0) {
+              // Prioritaskan suara Google Indonesia / Damayanti yang paling natural
+              const preferred = idVoices.find(v => {
+                const n = (v.name || '').toLowerCase();
+                return n.includes('google') || n.includes('damayanti') || n.includes('natural') || n.includes('online');
+              });
+              this.voice = preferred || idVoices[0];
+            }
           } catch (e) {}
         },
 
         cleanText(raw) {
           if (!raw) return '';
           let txt = String(raw);
-          // Ubah singkatan & simbol agar pelafalan Bahasa Indonesia alami untuk anak
           txt = txt.replace(/SOS/g, 'S O S');
           txt = txt.replace(/P3K/g, 'P tiga K');
           txt = txt.replace(/737/g, 'tujuh tiga tujuh');
@@ -1956,10 +1962,123 @@
           txt = txt.replace(/\((\d+)\/(\d+)\)/g, ', $1 dari $2.');
           txt = txt.replace(/\+1\s*Hati/gi, 'tambah satu hati');
           txt = txt.replace(/100%/g, 'seratus persen');
-          // Hapus emoji & simbol dekoratif agar tidak dibaca aneh oleh TTS
           txt = txt.replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}➔▲▼•]/gu, ' ');
           txt = txt.replace(/\s+/g, ' ').trim();
           return txt;
+        },
+
+        _splitIntoChunks(text) {
+          // Pecah kalimat panjang menjadi potongan pendek <= 115 karakter agar TTS HP tidak pernah macet
+          const rawParts = text.split(/(?<=[.!?])\s+/);
+          const chunks = [];
+          rawParts.forEach(part => {
+            const p = part.trim();
+            if (!p) return;
+            if (p.length <= 115) {
+              chunks.push(p);
+            } else {
+              const subParts = p.split(/,\s+/);
+              let buf = '';
+              subParts.forEach(sp => {
+                if ((buf + ' ' + sp).trim().length <= 115) {
+                  buf = (buf ? buf + ', ' + sp : sp).trim();
+                } else {
+                  if (buf) chunks.push(buf);
+                  buf = sp.trim();
+                }
+              });
+              if (buf) chunks.push(buf);
+            }
+          });
+          return chunks.length > 0 ? chunks : [text];
+        },
+
+        _clearWatchdog() {
+          if (this.watchdogTimer) {
+            clearInterval(this.watchdogTimer);
+            this.watchdogTimer = null;
+          }
+        },
+
+        _startWatchdog(maxDurationMs) {
+          this._clearWatchdog();
+          const startedAt = performance.now();
+          this.watchdogTimer = setInterval(() => {
+            try {
+              // Atasi bug Chrome Android yang sering menjeda speechSynthesis diam-diam
+              if (window.speechSynthesis && window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
+              }
+            } catch (e) {}
+
+            // Pengaman jika event onend tidak terpanggil oleh OS
+            if (performance.now() - startedAt > maxDurationMs) {
+              this._clearWatchdog();
+              this.queue = [];
+              this.currentUtter = null;
+              this.isSpeaking = false;
+              this._updatePillState();
+            }
+          }, 600);
+        },
+
+        _speakNextInQueue(rate, pitch) {
+          if (!this.enabled || AudioEngine.muted || this.queue.length === 0) {
+            this._clearWatchdog();
+            this.currentUtter = null;
+            this.isSpeaking = false;
+            this._updatePillState();
+            return;
+          }
+
+          const nextText = this.queue.shift();
+          try {
+            const utter = new SpeechSynthesisUtterance(nextText);
+            utter.lang = 'id-ID';
+            if (this.voice) utter.voice = this.voice;
+            utter.rate = rate;
+            utter.pitch = pitch;
+            utter.volume = 1.0;
+
+            // Wajib simpan ke properti objek agar tidak dihapus Garbage Collector Safari/Chrome
+            this.currentUtter = utter;
+
+            utter.onstart = () => {
+              this.isSpeaking = true;
+              this._updatePillState();
+            };
+
+            utter.onend = () => {
+              if (this.queue.length > 0) {
+                this._speakNextInQueue(rate, pitch);
+              } else {
+                this._clearWatchdog();
+                this.currentUtter = null;
+                this.isSpeaking = false;
+                this._updatePillState();
+              }
+            };
+
+            utter.onerror = () => {
+              this._clearWatchdog();
+              this.queue = [];
+              this.currentUtter = null;
+              this.isSpeaking = false;
+              this._updatePillState();
+            };
+
+            const estMs = Math.max(4500, nextText.length * 110);
+            this._startWatchdog(estMs);
+
+            // Panggil speak() secara sinkron tanpa setTimeout agar izin sentuhan iOS & Android selalu valid
+            window.speechSynthesis.speak(utter);
+          } catch (e) {
+            this._clearWatchdog();
+            this.queue = [];
+            this.currentUtter = null;
+            this.isSpeaking = false;
+            this._updatePillState();
+          }
         },
 
         speak(rawText, opts = {}) {
@@ -1967,63 +2086,48 @@
           const text = this.cleanText(rawText);
           if (!text) return;
 
+          const now = performance.now();
+          const interrupt = opts.interrupt !== false;
+
+          // Cegah tabrakan spam cancel() saat bermain (jika tidak dipicu klik langsung)
+          if (!interrupt) {
+            if (this.isSpeaking || (now - this.lastGlobalSpeakTime < 2200)) {
+              return;
+            }
+          }
+
           const cooldownMs = opts.cooldownMs || 0;
           const key = opts.key || text;
-          const now = performance.now();
           if (cooldownMs > 0 && this.lastSpokenMap[key] && (now - this.lastSpokenMap[key] < cooldownMs)) {
             return;
           }
           this.lastSpokenMap[key] = now;
+          this.lastGlobalSpeakTime = now;
 
           if (!this.voice) this._pickVoice();
 
-          if (this.speakTimer) {
-            clearTimeout(this.speakTimer);
-            this.speakTimer = null;
-          }
+          // Hentikan antrean lama secara bersih sebelum mulai kalimat baru
+          this._clearWatchdog();
+          this.queue = [];
+          this.currentUtter = null;
 
           try {
-            if (opts.interrupt !== false) {
+            if (window.speechSynthesis.speaking || window.speechSynthesis.pending || window.speechSynthesis.paused) {
               window.speechSynthesis.cancel();
             }
           } catch (e) {}
 
-          // Jeda singkat 45ms setelah cancel() agar Safari iOS & Chrome Android tidak melewatkan suara
-          this.speakTimer = setTimeout(() => {
-            if (!this.enabled || AudioEngine.muted) return;
-            try {
-              const utter = new SpeechSynthesisUtterance(text);
-              utter.lang = 'id-ID';
-              if (this.voice) utter.voice = this.voice;
-              utter.rate = opts.rate || 0.92;   // Sedikit lebih lambat & jelas untuk anak 5-8 tahun
-              utter.pitch = opts.pitch || 1.12; // Nada hangat dan ramah anak
-              utter.volume = 1.0;
+          const rate = opts.rate || (isAndroid ? 0.96 : 0.93);
+          const pitch = opts.pitch || (isAndroid ? 1.0 : 1.08);
 
-              utter.onstart = () => {
-                this.isSpeaking = true;
-                this._updatePillState();
-              };
-              utter.onend = () => {
-                this.isSpeaking = false;
-                this._updatePillState();
-              };
-              utter.onerror = () => {
-                this.isSpeaking = false;
-                this._updatePillState();
-              };
-
-              window.speechSynthesis.speak(utter);
-            } catch (e) {
-              this.isSpeaking = false;
-            }
-          }, 45);
+          this.queue = this._splitIntoChunks(text);
+          this._speakNextInQueue(rate, pitch);
         },
 
         stop() {
-          if (this.speakTimer) {
-            clearTimeout(this.speakTimer);
-            this.speakTimer = null;
-          }
+          this._clearWatchdog();
+          this.queue = [];
+          this.currentUtter = null;
           this.isSpeaking = false;
           this._updatePillState();
           if (!this.supported) return;
@@ -2038,7 +2142,6 @@
           if (!this.enabled) {
             this.stop();
           } else {
-            this.unlock();
             this.speak('Suara narasi Bahasa Indonesia aktif!', { interrupt: true });
           }
           this._updatePillState();
@@ -2365,7 +2468,7 @@
         ui.cockpitAlarm.textContent = text;
         ui.cockpitAlarm.classList.add('active');
         AudioEngine.playCockpitAlarm(style);
-        Narrator.speak(text, { key: 'alarm:' + text, cooldownMs: 4800, rate: 0.96 });
+        Narrator.speak(text, { key: 'alarm:' + text, cooldownMs: 5200, interrupt: false });
       }
 
       function clearAlarm() {
@@ -2379,7 +2482,7 @@
         ui.eduToast.classList.add('show');
         game.toastTimer = duration;
         if (speakIt) {
-          Narrator.speak(msg, { key: 'toast:' + msg.replace(/\(\d+\/\d+\)/g, ''), cooldownMs: 4200 });
+          Narrator.speak(msg, { key: 'toast:' + msg.replace(/\(\d+\/\d+\)/g, ''), cooldownMs: 4500, interrupt: false });
         }
       }
 
@@ -2572,7 +2675,8 @@
         ui.hud.classList.remove('hidden');
         updateSpeedUI();
         updateHUD();
-        showToast(m.startTip, 4.2);
+        showToast(m.startTip, 4.2, false);
+        Narrator.speak(m.startTip, { interrupt: true });
       }
 
       // =======================================================================
@@ -4889,7 +4993,7 @@
         const msg = (err && (err.message || String(err))) || 'Unknown error';
         if (msg !== lastErrorShown) {
           lastErrorShown = msg;
-          debugErrorEl.textContent = 'Info Teknis v6: ' + msg;
+          debugErrorEl.textContent = 'Info Teknis v7: ' + msg;
           debugErrorEl.style.display = 'block';
         }
       }
