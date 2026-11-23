@@ -1166,8 +1166,8 @@
               this._createNoiseBuffer();
               this._setupContinuousNodes();
             }
-            if (this.ctx.state === 'suspended') {
-              this.ctx.resume();
+            if (this.ctx.state !== 'running') {
+              this.ctx.resume().catch(() => {});
             }
           } catch (e) {}
         },
@@ -1523,12 +1523,18 @@
         // Simpan posisi vertikal relatif pesawat sebelum layar berubah (mis. saat HP diputar)
         const prevRelY = (H > 0 && game.player) ? (game.player.y / H) : 0.46;
 
+        const nextDpr = Math.min(window.devicePixelRatio || 1, 2);
+        const targetPixelW = Math.floor(nextW * nextDpr);
+        const targetPixelH = Math.floor(nextH * nextDpr);
+
         W = nextW;
         H = nextH;
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        dpr = nextDpr;
 
-        canvas.width = Math.floor(W * dpr);
-        canvas.height = Math.floor(H * dpr);
+        if (canvas.width !== targetPixelW || canvas.height !== targetPixelH) {
+          canvas.width = targetPixelW;
+          canvas.height = targetPixelH;
+        }
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         updateLayoutMetrics();
@@ -2584,8 +2590,7 @@
         const boardX = Math.max(8, Math.min(W - boardW - 8, tx - 56 * sc));
         const boardY = groundY - towerH - 62 * sc;
         ctx.fillStyle = isEmergency ? '#4ade80' : '#facc15';
-        ctx.beginPath();
-        ctx.roundRect(boardX, boardY, boardW, boardH, 10 * sc);
+        drawRoundRect(boardX, boardY, boardW, boardH, 10 * sc);
         ctx.fill();
         ctx.fillStyle = isEmergency ? '#14532d' : '#713f12';
         ctx.font = `bold ${Math.max(10, Math.round(13 * sc))}px Fredoka, sans-serif`;
@@ -2716,8 +2721,7 @@
         ctx.fillStyle = s.rescued ? '#dcfce7' : '#fee2e2';
         ctx.strokeStyle = s.rescued ? '#22c55e' : '#ef4444';
         ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.roundRect(-42, -52, 84, 28, 12);
+        drawRoundRect(-42, -52, 84, 28, 12);
         ctx.fill();
         ctx.stroke();
 
@@ -2855,8 +2859,7 @@
             ctx.fillStyle = '#ffffff';
             ctx.strokeStyle = '#22c55e';
             ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.roundRect(-16, -14, 32, 28, 8);
+            drawRoundRect(-16, -14, 32, 28, 8);
             ctx.fill();
             ctx.stroke();
             ctx.fillStyle = '#ef4444';
@@ -3081,13 +3084,17 @@
       let lastTime = 0;
 
       function gameLoop(timestamp) {
+        requestAnimationFrame(gameLoop);
         if (!lastTime) lastTime = timestamp;
         const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
         lastTime = timestamp;
 
-        update(dt);
-        render();
-        requestAnimationFrame(gameLoop);
+        try {
+          update(dt);
+          render();
+        } catch (err) {
+          // Jaga agar game loop tidak pernah berhenti total di browser lama
+        }
       }
 
       window.addEventListener('resize', resizeCanvas);
