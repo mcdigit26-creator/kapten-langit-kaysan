@@ -966,7 +966,7 @@
       }
 
       .plane-grid {
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 5px;
         margin-bottom: 6px;
       }
@@ -1125,7 +1125,7 @@
         </div>
 
         <h1 class="game-title">✈️ Kapten Langit</h1>
-        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v13</span></p>
+        <p class="game-subtitle">Simulasi Pesawat & Misi Penyelamatan • Usia 5–8 Tahun <span style="background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:999px;font-size:0.78em;">v14</span></p>
 
         <div class="card-scroll-body">
           <!-- 1. Pilih Jenis Pesawat -->
@@ -1160,6 +1160,11 @@
               <span class="plane-emoji">🚒</span>
               <span class="plane-name">Pemadam Api</span>
               <span class="plane-perk">Siram Air Hutan</span>
+            </div>
+            <div class="plane-card" data-plane="ambulance_heli" role="button" tabindex="0">
+              <span class="plane-emoji">🚑</span>
+              <span class="plane-name">Heli Ambulans</span>
+              <span class="plane-perk">Jemput Pasien (+1 ❤️)</span>
             </div>
           </div>
 
@@ -1239,10 +1244,21 @@
               <div class="mission-meta">
                 <div class="mission-badge-row">
                   <span class="mission-num">Misi 7</span>
-                  <span class="mission-new">BARU!</span>
                 </div>
                 <span class="mission-name">Pemadam Kebakaran Hutan</span>
-                <span class="mission-tag">Siram air padamkan api hutan</span>
+                <span class="mission-tag">Siram air & isi di awan hujan</span>
+              </div>
+            </div>
+
+            <div class="mission-card" data-mission="7" role="button" tabindex="0">
+              <span class="mission-icon">🏥</span>
+              <div class="mission-meta">
+                <div class="mission-badge-row">
+                  <span class="mission-num">Misi 8</span>
+                  <span class="mission-new">BARU!</span>
+                </div>
+                <span class="mission-name">Helikopter Ambulans</span>
+                <span class="mission-tag">Jemput pasien ke rumah sakit</span>
               </div>
             </div>
           </div>
@@ -1354,7 +1370,7 @@
   <script>
     /**
      * =========================================================================
-     * KAPTEN LANGIT: MISI PENYELAMATAN (v12)
+     * KAPTEN LANGIT: MISI PENYELAMATAN (v14)
      * - Analog Virtual 2-Sumbu (Naik/Turun + Kecepatan)
      * - Tombol Tembak & Rudal (Pesawat Militer), Tali (Helikopter), Siram Air
      * - 6 Jenis Pesawat & 7 Misi Edukasi Anak Usia 5-8 Tahun
@@ -1385,7 +1401,8 @@
         airbus:      { id: 'airbus',      name: 'Airbus',              speechDesc: 'Pesawat penumpang modern yang terbang sangat stabil.', bonusHearts: 0, agilityMult: 1.05, hasWeapons: false, hasRope: false, hasWater: false },
         helicopter:  { id: 'helicopter',  name: 'Helikopter',          speechDesc: 'Dilengkapi tali penyelamat untuk menarik korban di laut.', bonusHearts: 0, agilityMult: 1.12, hasWeapons: false, hasRope: true,  hasWater: false },
         military:    { id: 'military',    name: 'Pesawat Militer',     speechDesc: 'Dilengkapi tombol tembak dan rudal pelacak untuk menghalau musuh.', bonusHearts: 0, agilityMult: 1.18, hasWeapons: true,  hasRope: false, hasWater: false },
-        firefighter: { id: 'firefighter', name: 'Pesawat Pemadam Api', speechDesc: 'Dilengkapi tangki air untuk memadamkan kebakaran hutan.', bonusHearts: 0, agilityMult: 1.00, hasWeapons: false, hasRope: false, hasWater: true  }
+        firefighter:    { id: 'firefighter',    name: 'Pesawat Pemadam Api', speechDesc: 'Dilengkapi tangki air untuk memadamkan kebakaran hutan.', bonusHearts: 0, agilityMult: 1.00, hasWeapons: false, hasRope: false, hasWater: true  },
+        ambulance_heli: { id: 'ambulance_heli', name: 'Helikopter Ambulans', speechDesc: 'Helikopter medis cepat dengan tandu penyelamat dan tambahan satu nyawa untuk mengantar pasien ke rumah sakit.', bonusHearts: 1, agilityMult: 1.14, hasWeapons: false, hasRope: true, hasWater: false, isHeli: true }
       };
 
       const MISSIONS = [
@@ -1549,7 +1566,7 @@
           icon: '🌲',
           recommendedPlane: 'firefighter',
           briefing: 'Hutan pinus mengalami kebakaran! Terbangkan pesawat di atas titik api di hutan lalu tekan "💧 Siram Air" untuk memadamkan 4 titik api. Lewati awan hujan atau ikon air untuk mengisi tangki!',
-          startTip: '💧 Terbang di atas api hutan lalu tekan tombol Siram Air!',
+          startTip: '💧 Siram api hutan! Lewati awan hujan biru untuk mengisi tangki air!',
           winMsg: 'Hebat, Pahlawan Hutan! Semua kebakaran hutan berhasil dipadamkan dan pohon kembali hijau!',
           theme: 'forest_fire',
           mode: 'forest_fire',
@@ -1565,6 +1582,32 @@
             ],
             correctMsg: '🌟 Tepat sekali! Memadamkan kebakaran hutan menyelamatkan pohon, udara bersih, dan hewan hutan!',
             wrongMsg: '💡 Hutan adalah rumah bagi banyak hewan dan penghasil udara segar, jadi harus kita jaga!'
+          }
+        },
+        {
+          id: 7,
+          shortName: 'Misi 8: Heli Ambulans',
+          goalLabel: '🚑 0/2 Pasien ➔ 🏥 RS',
+          title: 'Misi 8: Helikopter Ambulans',
+          icon: '🏥',
+          recommendedPlane: 'ambulance_heli',
+          briefing: 'Ada pasien darurat yang butuh pertolongan cepat! Terbangkan Helikopter Ambulans di atas pasien, tekan "🪝 Jemput" untuk menaikkan 2 pasien, hindari kawanan burung, lalu mendarat di Helipad Rumah Sakit terdekat!',
+          startTip: '🚑 Terbang di atas pasien lalu tekan tombol 🪝 Jemput! Hindari kawanan burung ya!',
+          winMsg: 'Luar biasa, Dokter Terbang! Semua pasien berhasil diantar selamat ke Rumah Sakit terdekat!',
+          theme: 'city_ems',
+          mode: 'ambulance_rescue',
+          targetCount: 2,
+          duration: 45,
+          hasSOS: false,
+          windBase: 0.045,
+          quiz: {
+            question: 'Mengapa helikopter ambulans sangat membantu saat menolong pasien darurat?',
+            options: [
+              { emoji: '🚁🏥', text: 'Cepat sampai rumah sakit tanpa macet', correct: true },
+              { emoji: '🚗🐢', text: 'Terjebak macet lama di jalan raya', correct: false }
+            ],
+            correctMsg: '🌟 Pintar sekali! Helikopter ambulans terbang lewat udara sehingga pasien cepat ditolong dokter!',
+            wrongMsg: '💡 Helikopter ambulans terbang di langit agar bisa cepat mengantar pasien ke rumah sakit tanpa macet!'
           }
         }
       ];
@@ -2075,6 +2118,7 @@
 
         _splitIntoChunks(text) {
           // Pecah kalimat panjang menjadi potongan pendek <= 115 karakter agar TTS HP tidak pernah macet
+          // Kompatibel iOS 15 Safari (tanpa regex lookbehind)
           const rawParts = text.replace(/([.!?]+)\s+/g, '$1\n').split('\n');
           const chunks = [];
           rawParts.forEach(part => {
@@ -2628,6 +2672,8 @@
         const m = game.mission;
         if (m.mode === 'sea_rescue') {
           ui.hudGoalLabel.textContent = `🛟 ${game.missionKills}/${m.targetCount} Selamat`;
+        } else if (m.mode === 'ambulance_rescue') {
+          ui.hudGoalLabel.textContent = `🚑 ${game.missionKills}/${m.targetCount} Pasien ➔ 🏥`;
         } else if (m.mode === 'military_combat') {
           ui.hudGoalLabel.textContent = `🛩️ ${game.missionKills}/${m.targetCount} Musuh`;
         } else if (m.mode === 'forest_fire') {
@@ -2731,11 +2777,12 @@
         const m = game.mission;
 
         const showWeapons = planeCfg.hasWeapons || m.mode === 'military_combat';
-        const showRope = planeCfg.hasRope || m.mode === 'sea_rescue';
+        const showRope = planeCfg.hasRope || m.mode === 'sea_rescue' || m.mode === 'ambulance_rescue';
         const showWater = planeCfg.hasWater || m.mode === 'forest_fire';
 
         ui.militaryActions.classList.toggle('hidden', !showWeapons);
         ui.btnRope.classList.toggle('hidden', !showRope);
+        ui.btnRope.textContent = (m.mode === 'ambulance_rescue') ? '🪝 Jemput' : '🪝 Tali';
         ui.btnWater.classList.toggle('hidden', !showWater);
       }
 
@@ -3035,6 +3082,16 @@
         const theme = game.mission.theme;
         const sc = layout.scale;
 
+        // Edukasi keselamatan penerbangan: kawanan burung muncul di langit/sekitar bandara (Misi 1, 2, 3, 4, 8)
+        if ((theme === 'city_ems' && Math.random() < 0.65) ||
+            ((theme === 'storm' || theme === 'fog' || theme === 'wind' || theme === 'emergency') && Math.random() < 0.28)) {
+          game.obstacles.push({
+            type: 'birdFlock', x: W + 85 * sc, y, baseRadius: 30,
+            speed: 205 + Math.random() * 45, wingPhase: Math.random() * 6, warned: false
+          });
+          return;
+        }
+
         if (theme === 'storm') {
           game.obstacles.push({
             type: 'stormCloud', x: W + 80 * sc, y, baseRadius: 36,
@@ -3062,7 +3119,7 @@
             spin: 0, pushDir: Math.random() > 0.5 ? -1 : 1, lightningTimer: Math.random() * 2, warned: false
           });
         } else {
-          // Awan badai sesekali untuk misi 5, 6, 7
+          // Awan badai sesekali untuk misi 5, 6, 7, 8
           game.obstacles.push({
             type: 'stormCloud', x: W + 80 * sc, y, baseRadius: 32,
             speed: 175 + Math.random() * 40, lightningTimer: Math.random() * 2, warned: false
@@ -3074,8 +3131,8 @@
         const y = layout.safeTop + Math.random() * Math.max(40, layout.safeBottom - layout.safeTop);
         const m = game.mission;
         let itemType = 'star';
-        if (m.mode === 'forest_fire' && game.waterTank < 65 && Math.random() < 0.48) {
-          itemType = 'water_refill';
+        if (m.mode === 'forest_fire' && game.waterTank < 80 && Math.random() < 0.58) {
+          itemType = Math.random() < 0.55 ? 'rainCloud' : 'water_refill';
         } else if (game.hearts < game.maxHearts && Math.random() < 0.34) {
           itemType = 'medkit';
         }
@@ -3093,15 +3150,16 @@
         const sc = layout.scale;
         const m = game.mission;
 
-        if (m.mode === 'sea_rescue') {
-          // Penumpang kapal tenggelam dengan pelampung di permukaan laut
-          const seaY = H - layout.groundHeight + 6 * sc;
+        if (m.mode === 'sea_rescue' || m.mode === 'ambulance_rescue') {
+          // Penumpang laut (Misi 5) atau Pasien Darurat di daratan (Misi 8)
+          const groundY = H - layout.groundHeight + 6 * sc;
           game.seaSurvivors.push({
             x: W + 75 * sc,
-            y: seaY,
-            speed: 135,
+            y: groundY,
+            speed: 132,
             bob: Math.random() * Math.PI * 2,
-            rescued: false
+            rescued: false,
+            isPatient: (m.mode === 'ambulance_rescue')
           });
         } else if (m.mode === 'military_combat') {
           // Pesawat drone musuh penyusup
@@ -3146,7 +3204,7 @@
           game.speedIndex,
           isFlying ? game.mission.windBase : 0,
           game.turbulenceBoost,
-          game.selectedPlane === 'helicopter'
+          (game.selectedPlane === 'helicopter' || game.selectedPlane === 'ambulance_heli')
         );
 
         game.turbulenceBoost = Math.max(0, game.turbulenceBoost - dt * 1.4);
@@ -3342,7 +3400,7 @@
                 game.rope.caughtSurvivor = s;
                 game.rope.retracting = true;
                 AudioEngine.playStar();
-                showToast('🪝 Berhasil terkait! Menarik penumpang naik ke helikopter!', 2.2);
+                showToast(s.isPatient ? '🚑 Pasien terkait tandu! Menaikkan pasien ke helikopter!' : '🪝 Berhasil terkait! Menarik penumpang naik ke helikopter!', 2.2);
                 break;
               }
             }
@@ -3364,7 +3422,7 @@
                 game.stars += 5;
                 AudioEngine.playRescue();
                 spawnBurstParticles(p.x, p.y + 12 * sc, '#4ade80', 16);
-                showToast(`❤️ Penumpang selamat! (${game.missionKills}/${game.mission.targetCount})`, 2.6);
+                showToast(game.mission.mode === 'ambulance_rescue' ? `🚑 Pasien berhasil dijemput! (${game.missionKills}/${game.mission.targetCount})` : `❤️ Penumpang selamat! (${game.missionKills}/${game.mission.targetCount})`, 2.6);
               }
               game.rope.active = false;
               game.rope.retracting = false;
@@ -3490,7 +3548,7 @@
         // PROGRESS MISI & SPAWN OBJEK
         // =====================================================================
         const m = game.mission;
-        if (m.mode === 'sea_rescue' || m.mode === 'military_combat' || m.mode === 'forest_fire') {
+        if (m.mode === 'sea_rescue' || m.mode === 'ambulance_rescue' || m.mode === 'military_combat' || m.mode === 'forest_fire') {
           game.progress = Math.min(1, game.missionKills / m.targetCount);
 
           // Spawn entitas target misi baru
@@ -3676,6 +3734,10 @@
           if (o.type === 'stormCloud') {
             o.lightningTimer = (o.lightningTimer || 0) + dt;
           }
+          if (o.type === 'birdFlock') {
+            o.wingPhase = (o.wingPhase || 0) + dt * 13;
+            o.y += Math.sin(o.wingPhase * 0.45) * 18 * sc * dt;
+          }
 
           const warnRangeX = Math.min(240, W * 0.55);
           if (!o.warned && o.x > p.x && o.x - p.x < warnRangeX && Math.abs(o.y - p.y) < 82 * sc) {
@@ -3685,6 +3747,8 @@
               AudioEngine.playThunder(0.65);
             } else if (o.type === 'turbulence') {
               triggerAlarm('⚠️ TURBULENSI! HINDARI PUSARAN!', 'whoop', 1.25);
+            } else if (o.type === 'birdFlock') {
+              triggerAlarm('⚠️ AWAS KAWANAN BURUNG!', 'beep', 1.2);
             }
           }
 
@@ -3729,7 +3793,7 @@
               AudioEngine.playHit();
               if (o.type === 'stormCloud') AudioEngine.playThunder(0.9);
               spawnBurstParticles(p.x, p.y, '#facc15', 14);
-              showToast('⚡ Ups! Hati-hati awan badai ya, Kapten!', 2.0);
+              showToast(o.type === 'birdFlock' ? '🐦 Awas kawanan burung! Mesin pesawat harus dijaga agar tidak menabrak burung!' : '⚡ Ups! Hati-hati awan badai ya, Kapten!', 2.5);
               game.obstacles.splice(i, 1);
 
               if (game.hearts <= 0) {
@@ -3758,11 +3822,11 @@
               game.stars += 1;
               AudioEngine.playStar();
               spawnBurstParticles(c.x, cy, '#fde047', 10);
-            } else if (c.type === 'water_refill') {
+            } else if (c.type === 'water_refill' || c.type === 'rainCloud') {
               game.waterTank = 100;
               AudioEngine.playHeal();
-              spawnBurstParticles(c.x, cy, '#38bdf8', 12);
-              showToast('💧 Tangki air pemadam terisi penuh 100%!', 2.2);
+              spawnBurstParticles(c.x, cy, '#38bdf8', 15);
+              showToast(c.type === 'rainCloud' ? '🌧️ Hore! Melewati awan hujan, tangki air penuh 100%!' : '💧 Tangki air pemadam terisi penuh 100%!', 2.4);
             } else {
               if (game.hearts < game.maxHearts) {
                 game.hearts += 1;
@@ -3804,8 +3868,9 @@
             return;
           }
           game.state = 'LANDING';
-          game.airport = { x: W + 70 * sc, emergency: false };
-          showToast('🏁 Misi tercapai! Bersiap mendarat mulus...', 3.0);
+          const isHospital = (m.mode === 'ambulance_rescue');
+          game.airport = { x: W + 70 * sc, emergency: false, hospital: isHospital };
+          showToast(isHospital ? '🏥 Rumah Sakit terdekat terlihat! Mendarat di Helipad H...' : '🏁 Misi tercapai! Bersiap mendarat mulus...', 3.2);
         }
 
         updateHUD();
@@ -3836,6 +3901,10 @@
           grad.addColorStop(0, '#1d4ed8');
           grad.addColorStop(0.5, '#f97316');
           grad.addColorStop(1, '#fde047');
+        } else if (theme === 'city_ems') {
+          grad.addColorStop(0, '#0284c7');
+          grad.addColorStop(0.55, '#38bdf8');
+          grad.addColorStop(1, '#fef9c3');
         } else if (theme === 'forest_fire') {
           grad.addColorStop(0, '#7c2d12');
           grad.addColorStop(0.45, '#ea580c');
@@ -3953,53 +4022,94 @@
       function drawSeaSurvivorsAndForestFires() {
         const sc = layout.scale;
 
-        // Penumpang Kapal Tenggelam (Misi 5)
+        // Penumpang Laut (Misi 5) & Pasien Darurat (Misi 8)
         game.seaSurvivors.forEach(s => {
-          const sy = s.y + Math.sin(s.bob) * (4 * sc);
+          const sy = s.y + (s.isPatient ? 0 : Math.sin(s.bob) * (4 * sc));
           ctx.save();
           ctx.translate(s.x, sy);
           ctx.scale(sc, sc);
 
-          // Bagian haluan kapal miring di dekat penumpang pertama
-          ctx.fillStyle = '#475569';
-          ctx.beginPath();
-          ctx.moveTo(-42, 6);
-          ctx.lineTo(-14, -14);
-          ctx.lineTo(-8, 8);
-          ctx.closePath();
-          ctx.fill();
+          if (s.isPatient) {
+            // Tandu Medis / Pos Darurat Pasien
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.5;
+            drawRoundRect(-22, -6, 44, 14, 6);
+            ctx.fill();
+            ctx.stroke();
 
-          // Pelampung oranye
-          ctx.fillStyle = '#f97316';
-          ctx.beginPath();
-          ctx.ellipse(0, 2, 16, 7, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = '#ffffff';
-          ctx.lineWidth = 2;
-          ctx.stroke();
+            // Palang merah kecil di tandu
+            ctx.fillStyle = '#ef4444';
+            ctx.fillRect(-3, -3, 6, 8);
+            ctx.fillRect(-6, -1, 12, 4);
 
-          // Kepala & tangan melambai
-          ctx.fillStyle = '#fed7aa';
-          ctx.beginPath();
-          safeArc(0, -8, 6, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = '#fed7aa';
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(-5, -3);
-          ctx.lineTo(-12, -14 + Math.sin(game.time * 10) * 3);
-          ctx.moveTo(5, -3);
-          ctx.lineTo(12, -14 - Math.sin(game.time * 10) * 3);
-          ctx.stroke();
+            // Pasien melambaikan tangan
+            ctx.fillStyle = '#fed7aa';
+            ctx.beginPath();
+            safeArc(0, -13, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fed7aa';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-5, -8);
+            ctx.lineTo(-13, -18 + Math.sin(game.time * 9) * 3);
+            ctx.moveTo(5, -8);
+            ctx.lineTo(13, -18 - Math.sin(game.time * 9) * 3);
+            ctx.stroke();
 
-          // Balon SOS kecil
-          drawRoundRect(-24, -36, 48, 18, 8);
-          ctx.fillStyle = '#fef2f2';
-          ctx.fill();
-          ctx.fillStyle = '#dc2626';
-          ctx.font = 'bold 11px Fredoka, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('🆘 Tolong!', 0, -23);
+            // Balon panggilan ambulans
+            drawRoundRect(-30, -42, 60, 19, 8);
+            ctx.fillStyle = '#fef2f2';
+            ctx.fill();
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = '#dc2626';
+            ctx.font = 'bold 11px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🚑 Pasien!', 0, -29);
+          } else {
+            // Bagian haluan kapal miring
+            ctx.fillStyle = '#475569';
+            ctx.beginPath();
+            ctx.moveTo(-42, 6);
+            ctx.lineTo(-14, -14);
+            ctx.lineTo(-8, 8);
+            ctx.closePath();
+            ctx.fill();
+
+            // Pelampung oranye
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.ellipse(0, 2, 16, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Kepala & tangan melambai
+            ctx.fillStyle = '#fed7aa';
+            ctx.beginPath();
+            safeArc(0, -8, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fed7aa';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-5, -3);
+            ctx.lineTo(-12, -14 + Math.sin(game.time * 10) * 3);
+            ctx.moveTo(5, -3);
+            ctx.lineTo(12, -14 - Math.sin(game.time * 10) * 3);
+            ctx.stroke();
+
+            // Balon SOS kecil
+            drawRoundRect(-24, -36, 48, 18, 8);
+            ctx.fillStyle = '#fef2f2';
+            ctx.fill();
+            ctx.fillStyle = '#dc2626';
+            ctx.font = 'bold 11px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🆘 Tolong!', 0, -23);
+          }
 
           ctx.restore();
         });
@@ -4065,8 +4175,70 @@
         const ax = game.airport.x;
         const groundY = H - layout.groundHeight;
         const isEmergency = game.airport.emergency;
+        const isHospital = game.airport.hospital;
 
         ctx.save();
+
+        if (isHospital) {
+          // Landasan Helipad Rumah Sakit Terdekat
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(ax - 55 * sc, groundY, W + 120, layout.groundHeight + 4);
+
+          // Lingkaran Helipad H
+          const hx = ax + 78 * sc;
+          const hy = groundY + layout.groundHeight * 0.45;
+          ctx.strokeStyle = '#facc15';
+          ctx.lineWidth = Math.max(3, 4 * sc);
+          ctx.beginPath();
+          ctx.ellipse(hx, hy, 44 * sc, 15 * sc, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.fillStyle = '#facc15';
+          ctx.font = `bold ${Math.max(14, Math.round(19 * sc))}px Fredoka, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText('H', hx, hy + 6 * sc);
+
+          // Gedung Rumah Sakit Putih-Merah
+          const bx = Math.min(W - 135 * sc, ax + 145 * sc);
+          const bh = 96 * sc;
+          const bw = 112 * sc;
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 2;
+          drawRoundRect(bx, groundY - bh, bw, bh, 8 * sc);
+          ctx.fill();
+          ctx.stroke();
+
+          // Atap merah & simbol palang medis besar
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(bx - 4 * sc, groundY - bh - 8 * sc, bw + 8 * sc, 10 * sc);
+          ctx.fillRect(bx + bw * 0.5 - 6 * sc, groundY - bh + 12 * sc, 12 * sc, 30 * sc);
+          ctx.fillRect(bx + bw * 0.5 - 15 * sc, groundY - bh + 21 * sc, 30 * sc, 12 * sc);
+
+          // Jendela rumah sakit
+          ctx.fillStyle = '#bae6fd';
+          for (let rx = 12; rx <= 84; rx += 26) {
+            ctx.fillRect(bx + rx * sc, groundY - bh + 52 * sc, 16 * sc, 16 * sc);
+          }
+
+          // Papan Nama Rumah Sakit
+          const boardW = 148 * sc;
+          const boardH = 26 * sc;
+          const boardX = Math.max(8, Math.min(W - boardW - 8, bx - 16 * sc));
+          const boardY = groundY - bh - 42 * sc;
+          ctx.fillStyle = '#fee2e2';
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2;
+          drawRoundRect(boardX, boardY, boardW, boardH, 10 * sc);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#b91c1c';
+          ctx.font = `bold ${Math.max(10, Math.round(13 * sc))}px Fredoka, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.fillText('🏥 RUMAH SAKIT', boardX + boardW * 0.5, boardY + boardH * 0.68);
+
+          ctx.restore();
+          return;
+        }
 
         if (isEmergency && (game.state === 'APPROACH' || game.state === 'LANDING')) {
           const pulse = 0.5 + 0.5 * Math.sin(game.time * 7);
@@ -4181,7 +4353,82 @@
           ctx.globalAlpha = 0.48;
         }
 
-        if (type === 'helicopter') {
+        if (type === 'ambulance_heli') {
+          // HELIKOPTER AMBULANS MEDIS (PUTIH-MERAH + PALANG MEDIS + STROBO)
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.moveTo(-14, 0);
+          ctx.lineTo(-42, -4);
+          ctx.stroke();
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(-26, -2);
+          ctx.lineTo(-36, -3);
+          ctx.stroke();
+
+          // Rotor ekor
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 3;
+          const tailR = 9 * Math.sin(p.propAngle * 1.5);
+          ctx.beginPath();
+          ctx.moveTo(-42, -4 - tailR);
+          ctx.lineTo(-42, -4 + tailR);
+          ctx.stroke();
+
+          // Kaki skid pendarat
+          ctx.strokeStyle = '#334155';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(-12, 14);
+          ctx.lineTo(-14, 21);
+          ctx.moveTo(12, 14);
+          ctx.lineTo(14, 21);
+          ctx.moveTo(-22, 21);
+          ctx.lineTo(24, 21);
+          ctx.stroke();
+
+          // Kabin putih dengan garis merah medis
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.ellipse(2, 2, 26, 15, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(-18, 5, 36, 4);
+
+          // Simbol Palang Merah Medis di badan helikopter
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(-9, -6, 4, 12);
+          ctx.fillRect(-13, -2, 12, 4);
+
+          // Kaca kokpit
+          ctx.fillStyle = '#bae6fd';
+          ctx.beginPath();
+          safeArc(12, -2, 11, -Math.PI * 0.5, Math.PI * 0.4);
+          ctx.fill();
+
+          // Lampu strobo ambulans berkedip merah-biru
+          const strobeBlue = Math.floor(game.time * 10) % 2 === 0;
+          ctx.fillStyle = strobeBlue ? '#3b82f6' : '#ef4444';
+          ctx.beginPath();
+          safeArc(-4, -14, 3.8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Baling-baling utama di atas
+          ctx.fillStyle = '#475569';
+          ctx.fillRect(-2, -18, 4, 6);
+          const bladeW = 44 * Math.cos(p.propAngle * 1.4);
+          ctx.strokeStyle = '#1e293b';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.moveTo(-bladeW, -19);
+          ctx.lineTo(bladeW, -19);
+          ctx.stroke();
+        } else if (type === 'helicopter') {
           // HELIKOPTER PENYELAMAT
           ctx.strokeStyle = '#ef4444';
           ctx.lineWidth = 6;
@@ -4657,6 +4904,32 @@
               safeArc(0, 0, r, 0, Math.PI * 1.35);
               ctx.stroke();
             }
+          } else if (o.type === 'birdFlock') {
+            // Kawanan 3 burung mengepakkan sayap (edukasi bahaya bird strike mesin pesawat)
+            const flap = Math.sin(o.wingPhase || 0) * 7;
+            const offsets = [{ bx: -14, by: -8 }, { bx: 6, by: 2 }, { bx: -6, by: 12 }];
+            offsets.forEach((bo, idx) => {
+              const f = idx % 2 === 0 ? flap : -flap;
+              ctx.fillStyle = '#475569';
+              ctx.beginPath();
+              ctx.ellipse(bo.bx, bo.by, 8, 4.5, 0, 0, Math.PI * 2);
+              ctx.fill();
+              // Sayap mengepak
+              ctx.strokeStyle = '#1e293b';
+              ctx.lineWidth = 2.5;
+              ctx.beginPath();
+              ctx.moveTo(bo.bx - 2, bo.by);
+              ctx.quadraticCurveTo(bo.bx + 4, bo.by - 10 + f, bo.bx + 10, bo.by - 4 + f);
+              ctx.stroke();
+              // Paruh kuning menghadap ke kiri (arah pesawat)
+              ctx.fillStyle = '#facc15';
+              ctx.beginPath();
+              ctx.moveTo(bo.bx - 7, bo.by - 1);
+              ctx.lineTo(bo.bx - 13, bo.by + 1);
+              ctx.lineTo(bo.bx - 7, bo.by + 3);
+              ctx.closePath();
+              ctx.fill();
+            });
           }
 
           ctx.restore();
@@ -4686,6 +4959,31 @@
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
+          } else if (c.type === 'rainCloud') {
+            // Awan Hujan Biru Ramah pengisi tangki air Misi 7
+            ctx.fillStyle = '#38bdf8';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            safeArc(-14, 0, 14, 0, Math.PI * 2);
+            safeArc(2, -7, 17, 0, Math.PI * 2);
+            safeArc(17, 0, 13, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            // Rintik hujan biru di bawah awan
+            ctx.strokeStyle = '#bae6fd';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            for (let rx = -10; rx <= 10; rx += 10) {
+              ctx.beginPath();
+              ctx.moveTo(rx, 13);
+              ctx.lineTo(rx - 3, 22);
+              ctx.stroke();
+            }
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px Fredoka, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('💧 Isi Air', 2, 3);
           } else if (c.type === 'water_refill') {
             ctx.fillStyle = '#38bdf8';
             ctx.strokeStyle = '#ffffff';
@@ -4985,7 +5283,7 @@
           if (e.key === 'z' || e.key === 'Z' || e.key === 'Enter') fireBullet();
           if (e.key === 'x' || e.key === 'X' || e.key === 'Shift') fireMissile();
           if (e.key === ' ') {
-            if (game.mission.mode === 'sea_rescue') triggerRescueRope();
+            if (game.mission.mode === 'sea_rescue' || game.mission.mode === 'ambulance_rescue') triggerRescueRope();
             else if (game.mission.mode === 'forest_fire') dropWaterBomb();
             else activateRadar();
           }
@@ -5143,7 +5441,7 @@
         const msg = (err && (err.message || String(err))) || 'Unknown error';
         if (msg !== lastErrorShown) {
           lastErrorShown = msg;
-          debugErrorEl.textContent = 'Info Teknis v13: ' + msg;
+          debugErrorEl.textContent = 'Info Teknis v14: ' + msg;
           debugErrorEl.style.display = 'block';
         }
       }
